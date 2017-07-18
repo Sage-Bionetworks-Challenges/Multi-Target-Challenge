@@ -1,1 +1,1 @@
-# Multi-Target-DREAM
+# Multi-Target-Challenge
