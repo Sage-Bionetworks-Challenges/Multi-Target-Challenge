@@ -1,0 +1,96 @@
+
+Please configure your challenge. See challenge_config.template.py for an example.
+
+Traceback (most recent call last):
+  File "./challenge.py", line 57, in <module>
+    raise ex1
+  File "/Users/xindiguo/Documents/DREAM/Multi-Target-DREAM/scoring_harness/challenge_config.py", line 65
+    'validation_func':validate_func
+                    ^
+SyntaxError: invalid syntax
+
+Please configure your challenge. See challenge_config.template.py for an example.
+
+Traceback (most recent call last):
+  File "./challenge.py", line 57, in <module>
+    raise ex1
+  File "/Users/xindiguo/Documents/DREAM/Multi-Target-DREAM/scoring_harness/challenge_config.py", line 65
+    'validation_func':validate_func
+                    ^
+SyntaxError: invalid syntax
+
+
+===========================================================================
+2017-07-18T20:37:33.183924
+Welcome, Xindi Guo!
+
+
+
+Validating 9605459 Xindi tester
+------------------------------------------------------------
+
+done:  2017-07-18T20:37:37.115160
+=========================================================================== 
+
+
+
+
+===========================================================================
+2017-07-18T20:37:37.567193
+Welcome, Xindi Guo!
+
+
+
+Scoring  9605459 Xindi tester
+------------------------------------------------------------
+
+
+done:  2017-07-18T20:37:40.559397
+=========================================================================== 
+
+
+
+
+===========================================================================
+2017-07-18T20:41:30.407702
+Welcome, Xindi Guo!
+
+
+
+Validating 9605459 Xindi tester
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "./challenge.py", line 224, in validate
+    is_valid, validation_message = conf.validate_submission(evaluation, submission)
+  File "/Users/xindiguo/Documents/DREAM/Multi-Target-DREAM/scoring_harness/challenge_config.py", line 104, in validate_submission
+    validated, validation_message = config['validation_func'](submission, config['goldstandard_path'])
+  File "/Users/xindiguo/Documents/DREAM/Multi-Target-DREAM/scoring_harness/challenge_config.py", line 46, in validate_func
+    assert os.path.basename(submission.filePath) == "success.txt", "Submission file must be named success.txt"
+AssertionError: Submission file must be named success.txt
+validating 9622640 success.txt
+validating 9622641 invalid.txt
+Exception during validation: <type 'exceptions.AssertionError'> Submission file must be named success.txt Submission file must be named success.txt
+sent:  {u'withUnsubscribeLink': False, u'fileHandleId': u'16705637', u'recipients': [u'3334658'], u'createdOn': u'2017-07-18T20:41:44.520Z', u'withProfileSettingLink': True, u'inReplyToRoot': u'167567', u'createdBy': u'3334658', u'isNotificationMessage': False, u'id': u'167567', u'subject': u'Validation error in submission to Xindi tester'}
+
+done:  2017-07-18T20:41:42.118075
+=========================================================================== 
+
+
+
+
+===========================================================================
+2017-07-18T20:41:42.556859
+Welcome, Xindi Guo!
+
+
+
+Scoring  9605459 Xindi tester
+------------------------------------------------------------
+scored: 9622640 success.txt 3334658 {'score': 5}
+sent:  {u'withUnsubscribeLink': False, u'fileHandleId': u'16705639', u'recipients': [u'3334658'], u'createdOn': u'2017-07-18T20:41:53.255Z', u'withProfileSettingLink': True, u'inReplyToRoot': u'167568', u'createdBy': u'3334658', u'isNotificationMessage': False, u'id': u'167568', u'subject': u'Scored submission to Xindi tester'}
+
+
+done:  2017-07-18T20:41:51.232208
+=========================================================================== 
+
+
