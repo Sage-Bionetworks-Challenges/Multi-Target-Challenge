@@ -229,7 +229,7 @@ def validate(evaluation, canCancel, dry_run=False):
             traceback.print_exc()
             validation_message = str(ex1)
 
-        status.status = "VALIDATED" if is_valid else "INVALID"
+        status.status = "RECEIVED" if is_valid else "INVALID"
         if canCancel:
             status.canCancel = True
         if not is_valid:
