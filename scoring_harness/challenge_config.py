@@ -10,7 +10,7 @@
 ##
 ##-----------------------------------------------------------------------------
 import os
-
+import yaml
 ## A Synapse project will hold the assetts for your challenge. Put its
 ## synapse ID here, for example
 ## CHALLENGE_SYN_ID = "syn1234567"
@@ -42,9 +42,39 @@ def validate_func(submission, goldstandard_path):
     ##Read in submission (submission.filePath)
     ##Validate submission
     ## MUST USE ASSERTION ERRORS!!! 
-    ##eg.
-    assert os.path.basename(submission.filePath) == "multi_target_prediction.tsv", "Submission file must be named multi_target_prediction.tsv"
-    ## or raise AssertionError()...
+    
+    # Check file formart
+    assert submission.filePath.endswith(".yml") or submission.filePath.endswith(".yaml"),"Submission file must be in yaml file format."
+    # Validate/Load file
+    with open(submission.filePath,'r') as f:
+       try:
+           data_loaded = yaml.load(f)
+       except yaml.YAMLError:
+            assert False,"Your file cannot be parsed. Please check the syntax."
+    # Check if required fields are filled
+    ## Prediction Methods
+    preditction_method = data_loaded['Prediction Methods']
+    assert preditction_method and preditction_method != "Replace this text with your prediction methods text, written as for submission to Nature Chemical Biology.",'"Prediction Methods" is required.'
+    ## Rationale
+    rationale = data_loaded['Rationale']
+    rationale_p1 = rationale['Why is your approach innovative?']
+    rationale_p2 = rationale['Why will your approach be generalizable?']
+    assert rationale_p1 and rationale_p1 != "Replace this text with explanation of why your approach is innovative.",'"Why is your approach innovative?" requires an answer.'
+    assert rationale_p2 and rationale_p2 != "Replace this text with explanation of why your approach is generalizable.",'"Why will your approach be generalizable?" requires an answer.'
+    ## Solutions
+    solution_template = {"ZINC ID": "Your ZINC ID here",
+                         "VENDOR ID": "The ID provided for this compound from the vendor",
+                         "SMILES string": "Your SMILES string here",
+                         "VENDOR NAME": "The name of a vendor from which the compound can be purchased",
+                         "Explanation of chemical novelty": "Your explanation here."}
+    ## Problem 1 - Solution 1
+    p1s1 = data_loaded['Problem 1'][0]['Solution 1']
+    for question, answer in p1s1.iteritems():
+            assert answer and solution_template[question] != answer,"%s is required for Problem 1 - Solution 1." % question
+    ## Problem 1 - Solution 1
+    p2s1 = data_loaded['Problem 2'][0]['Solution 1']
+    for question, answer in p2s1.iteritems():
+            assert answer and solution_template[question] != answer,"%s is required for Problem 2 - Solution 1." % question
     ## Only assertion errors will be returned to participants, all other errors will be returned to the admin
     return(True,"Passed Validation")
 
