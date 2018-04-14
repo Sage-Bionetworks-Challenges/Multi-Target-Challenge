@@ -8,6 +8,8 @@ for filename in chembl/*_ligands.tsv; do
 done
 
 echo "merging files..."
-python merge_tanimoto.py
+
+python merge_tanimoto.py "./" "*_tanimoto_result.csv" "tanimoto_result.csv"
+python merge_tanimoto.py "./" "*_tanimoto_median.csv" "tanimoto_median.csv"
 
 echo "completed."

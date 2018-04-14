@@ -1,6 +1,8 @@
 #!/bin/python
 
 import pandas
+import numpy
+
 from rdkit import Chem
 from rdkit import DataStructs
 
@@ -9,8 +11,9 @@ from rdkit.Chem import AllChem
 def get_mol(smiles_string):
     return(Chem.MolFromSmiles(smiles_string))
 
+# Calculate with ECFP6 fingerprints
 def get_fingerprint(mol):
-    return(AllChem.GetMorganFingerprintAsBitVect(mol,2,2048))
+    return(AllChem.GetMorganFingerprintAsBitVect(mol,3,2048))
 
 def compare_similarity(fp1, fp2):
     return(DataStructs.FingerprintSimilarity(fp1,fp2))
@@ -29,16 +32,22 @@ def _get_result(smiles, ref_df):
 
 def get_result(sub_df, ref_df, target_name):
     print("calculating...")
-    result = []
+    result_pass = []
+    result_median = []
     for _, row in sub_df.iterrows():
         smiles_str = row['smiles_string']
         row_cal_dict = _get_result(smiles_str,ref_df)
         row_dict = {}
+        
         row_dict[target_name] = all(v < 0.4 for v in row_cal_dict.values())
         row_dict['submission_id'] = row['submission_id']
         row_dict['smiles_string'] = row['smiles_string']
-        result.append(row_dict)
-    return result
+        result_pass.append(row_dict)
+
+        row_dict[target_name] = numpy.median(row_cal_dict.values())
+        result_median.append(row_dict)
+
+    return result_pass, result_median
 
 def main():
     import argparse
@@ -62,9 +71,13 @@ def main():
     ref_df = ref_df[['molecule_chembl_id','canonical_smiles']]
     ref_df = ref_df.drop_duplicates()
 
-    result_ls = get_result(sub_df,ref_df,target_name)
-    result_df = pandas.merge(sub_df,pandas.DataFrame(result_ls),on=['submission_id','smiles_string'])
-    result_df.to_csv(target_name+"_tanimoto_result.csv",index=False)
+    result_pass_ls, result_median_ls = get_result(sub_df,ref_df,target_name)
+    
+    result_pass_df = pandas.merge(sub_df,pandas.DataFrame(result_pass_ls),on=['submission_id','smiles_string'])
+    result_median_df = pandas.merge(sub_df,pandas.DataFrame(result_median_ls),on=['submission_id','smiles_string'])
+
+    result_pass_df.to_csv(target_name+"_tanimoto_result.csv",index=False)
+    result_median_df.to_csv(target_name+"_tanimoto_median.csv",index=False)
 
 if __name__ == '__main__':
     main()
