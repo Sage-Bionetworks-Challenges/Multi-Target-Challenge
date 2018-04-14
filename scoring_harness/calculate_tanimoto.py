@@ -38,14 +38,16 @@ def get_result(sub_df, ref_df, target_name):
         smiles_str = row['smiles_string']
         row_cal_dict = _get_result(smiles_str,ref_df)
         row_dict = {}
-        
-        row_dict[target_name] = all(v < 0.4 for v in row_cal_dict.values())
         row_dict['submission_id'] = row['submission_id']
         row_dict['smiles_string'] = row['smiles_string']
+        
+        row_dict_cp = row_dict.copy()
+
+        row_dict[target_name] = all(v < 0.4 for v in row_cal_dict.values())
         result_pass.append(row_dict)
 
-        row_dict[target_name] = numpy.median(row_cal_dict.values())
-        result_median.append(row_dict)
+        row_dict_cp[target_name] = numpy.median(row_cal_dict.values())
+        result_median.append(row_dict_cp)
 
     return result_pass, result_median
 
