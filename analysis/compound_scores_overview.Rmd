@@ -1,11 +1,35 @@
-#! /usr/bin/env Rscript
+---
+title: "compound scores overview"
+author: "Xindi Guo, Kristen Dang"
+date: "4/4/2018"
+output: ioslides_presentation
+---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
 library(synapser)
 synLogin()
+library(gplots)
+library(RColorBrewer)
+```
+
+## Review of Tanimoto scores
+
+There are two problems in this challenge; each has a set of targets and antitargets. Participants can suggest multiple compounds as solutions for each problem.
+
+For each compound that is submitted, we calculate a Tanimoto score to assess its structural similarity to known small-molecule ligands of the targets.
+
+## Parameters of calculation
+
+- ChEMBL as source of ligands
+- Have Kd or IC50 < 10 uM, **per each** target
+- Tanimoto calculation on Morgan Fingerprint, radius 3 (ECFP6-like) is used
 
 
+## Compounds passing Tanimoto
 
-allCompounds = as.data.frame(synTableQuery('select * from syn12063758',includeRowIdAndRowVersion = FALSE))
+```{r include=FALSE}
+allCompounds = as.data.frame(synTableQuery('select * from syn12137044',includeRowIdAndRowVersion = FALSE))
 problemInfo = as.data.frame(synTableQuery('select * from syn12081609',includeRowIdAndRowVersion = FALSE))
 
 targets = union(grep(colnames(allCompounds),pattern = "CHEMB"), grep (colnames(allCompounds), pattern="pass"))
@@ -89,23 +113,86 @@ counts[3,2] = length(rowProb2) - counts[3,1]
 
 counts[2,2] = length(rowProb1) - counts[2,1]
 counts[4,2] = length(rowProb2) - counts[4,1]
+```
 
+```{r Tanimoto, echo = FALSE}
 op = par()
 par(mar = c(10,4,4,2))
 barplot(t(counts),beside = FALSE,legend.text = colnames(counts), las = 2, ylab = "number of submitted compounds", main = "Tanimoto score results")
 par(op)
+```
 
-## What is the average pass rate per target?
+## Average pass rate per target?
+
+```{r pertarget, echo=FALSE}
 targets = grep(colnames(allCompounds),pattern = "CHEMB")
 row1Pass = colSums(allCompounds[rowProb1,targets])
 row2Pass = colSums(allCompounds[rowProb2,targets])
 
 boxplot(row1Pass/length(rowProb1), row2Pass/length(rowProb2), ylab = "Fraction of compounds passing Tanimoto", main = "Solution uniqueness per target", names = c("problem 1", "problem 2"))
+```
+
+## Median Tanimoto score per target
+```{r medScore, echo=FALSE}
+medTanimoto = as.data.frame(synTableQuery('select * from syn12137045',includeRowIdAndRowVersion = FALSE))
+# Make problem 1 matrix
+targetProb1 = which(colnames(medTanimoto) %in% c(problemInfo$chembl_id[prob1AllBind]))
+prob1Tan = medTanimoto[rowProb1,targetProb1]
+colnames(prob1Tan) = problemInfo$target[match(colnames(prob1Tan), problemInfo$chembl_id)]
+# Make problem 2 matrix
+targetProb2 = which(colnames(medTanimoto) %in% c(problemInfo$chembl_id[prob2AllBind]))
+prob2Tan = medTanimoto[rowProb2,targetProb2]
+colnames(prob2Tan) = problemInfo$target[match(colnames(prob2Tan), problemInfo$chembl_id)]
+
+targetsT = grep(colnames(medTanimoto),pattern = "CHEMB")
+
+# Tanimoto per target
+op = par()
+par(mfrow = c(1,2))
+boxplot(prob1Tan, las = 2, ylab = "median Tanimoto score per compound", main = "problem 1", ylim = range(min(medTanimoto[,targetsT]), max(medTanimoto[,targetsT])))
+boxplot(prob2Tan, las = 2, ylab = "median Tanimoto score per compound", main = "problem 2", ylim = range(min(medTanimoto[,targetsT]), max(medTanimoto[,targetsT])))
+par(op)
+```
 
 
+## Median Tanimoto score per team
+```{r medTeam, echo=FALSE}
 
-## How many compounds pass Lipinski
+# Tanimoto per team
+op = par()
+par(mfrow = c(1,2))
 
+prob1wide = reshape(medTanimoto[rowProb1,c(1,2,3,targetProb1)], v.names = colnames(medTanimoto)[targetProb1], idvar = "submission_id", direction = "wide", timevar = "solution", drop = "problem")
+prob2wide = reshape(medTanimoto[rowProb2,c(1,2,3,targetProb2)], v.names = colnames(medTanimoto)[targetProb2], idvar = "submission_id", direction = "wide", timevar = "solution", drop = "problem")
+
+boxplot(t(prob1wide[,2:ncol(prob1wide)]), names = prob1wide[,1], las = 2, ylab = "median Tanimoto score per compound", main = "problem 1")
+boxplot(t(prob2wide[,2:ncol(prob2wide)]), names = prob2wide[,1], las = 2, ylab = "median Tanimoto score per compound", main = "problem 2")
+par(op)
+
+```
+
+## Compound and target clustering  
+```{r heat1, echo=FALSE}
+plotcols = brewer.pal(n = length(unique(medTanimoto$submission_id)),name = "Set3")
+
+y = data.matrix(medTanimoto[rowProb1,targetProb1])
+colnames(y) = problemInfo$target[match(colnames(y), problemInfo$chembl_id)]
+
+heatmap.2(t(y),scale = "row",na.rm = TRUE, ColSideColors = plotcols[as.numeric(as.factor(medTanimoto$submission_id[rowProb1]))],labCol = "",trace = "none", main = "problem 1",cexRow = 1.1,col = brewer.pal(11,"BrBG"))
+
+```
+
+## Compound and target clustering 
+```{r heat2, echo=FALSE}
+y = data.matrix(medTanimoto[rowProb2,targetProb2])
+colnames(y) = problemInfo$target[match(colnames(y), problemInfo$chembl_id)]
+heatmap.2(t(y),scale = "row",na.rm = TRUE, ColSideColors = plotcols[as.numeric(as.factor(medTanimoto$submission_id[rowProb2]))], labCol = "",trace = "none", main = "problem 2",cexRow = 1.1,,col = brewer.pal(11,"BrBG"))
+```
+
+
+## How many compounds pass Lipinski and polar surface area?
+
+```{r lipinski, echo=FALSE}
 lipPSA = as.data.frame(synTableQuery('select submission_id, problem, solution, pass_lipinski, pass_polar_surface_area from syn12063027', includeRowIdAndRowVersion = FALSE))
 
 targets = grep (colnames(lipPSA), pattern="pass")
@@ -135,12 +222,11 @@ counts[2,2] = length(rowProb2) - counts[2,1]
 
 op = par()
 par(mar = c(10,4,4,2))
+par(mfrow = c(1,2))
 barplot(t(counts),beside = FALSE,legend.text = colnames(counts), las = 2, ylab = "number of submitted compounds", main = "Lipinski rule results")
-par(op)
 
 
-
-## How many compounds pass PSA
+## How many compounds pass polar surface area criterion?
 
 counts = matrix(NA,nrow = 1, ncol = 2)
 colnames(counts) = c("pass", "fail")
@@ -152,15 +238,17 @@ counts[1,1] = sum(lipPSA[rowProb1,sumCols])
 # Count fail
 counts[1,2] = length(rowProb1) - counts[1,1]
 
-op = par()
-par(mar = c(10,4,4,2))
 barplot(t(counts),beside = FALSE,legend.text = colnames(counts), las = 2, ylab = "number of submitted compounds", main = "PSA rule results")
 par(op)
+```
 
-## Total fraction passing filters
+## Compounds passing all criteria
 
+```{r final, echo = FALSE}
 targets = union(union(grep(colnames(allCompounds),pattern = "CHEMB"), grep(colnames(allCompounds), pattern="for")), grep(colnames(allCompounds), pattern = "smiles"))
 combinedData = merge(lipPSA, allCompounds[,-targets])
 
-barplot(table(rowSums(combinedData[rowProb1,c(4,6)])), col = rainbow(5), main = "Success rate in passing criteria", ylab = "Number of compounds", xlab = "Number of criteria met")
-barplot(table(rowSums(combinedData[rowProb2,c(4,5,6)])), col = rainbow(5), main = "Success rate in passing criteria", ylab = "Number of compounds", xlab = "Number of criteria met")
+par(mfrow = c(1,2))
+barplot(table(rowSums(combinedData[rowProb1,c(4,6)])), col = rainbow(5), main = "Success rate - problem 1", ylab = "Number of compounds", xlab = "Number of criteria met")
+barplot(table(rowSums(combinedData[rowProb2,c(4,5,6)])), col = rainbow(5), main = "Success rate  - problem 2", ylab = "Number of compounds", xlab = "Number of criteria met")
+```
