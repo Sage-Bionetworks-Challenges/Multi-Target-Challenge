@@ -32,6 +32,9 @@ For each compound that is submitted, we calculate a Tanimoto score to assess its
 allCompounds = as.data.frame(synTableQuery('select * from syn12137044',includeRowIdAndRowVersion = FALSE))
 problemInfo = as.data.frame(synTableQuery('select * from syn12081609',includeRowIdAndRowVersion = FALSE))
 
+
+problemInfo$target[which(problemInfo$target == "Aurora Kinase A")] = "AURKA"
+
 targets = union(grep(colnames(allCompounds),pattern = "CHEMB"), grep (colnames(allCompounds), pattern="pass"))
 for (i in targets){ 
   toReplace = which(allCompounds[,i] == 'true')
