@@ -1,0 +1,96 @@
+Prediction Methods: |
+ Assumption; (Guilt by association[1])simlar drugs tend to have similar bahavior on target proteins.
+ In our method, we first find the compounds (mainly in Drugbank dataset) that can 
+ Bind and inhibit the target provided in the Challenge Question. For example, for Challenge Question 1, 
+ we can find the following the compounds (Drugbank ID) bind their corresponding targets, we called them "existing" compounds;
+ RET; DB08901 DB08896 DB00398
+ BRAF; DB08912 DB08881 DB08896 DB00398 DB08881 
+ SRC; DB06616 DB01254 DB09079 DB08901
+ S6k; None
+ MKNK1; None
+ TTK; None
+ ErK8; None
+ PAK3; None
+ PDK1; DB07132 DB07033 DB01933 DB00482 DB04522 DB03777 DB02010
+ For PDK1, these compounds are not FDA approved, but we still extract their coumpund SMILE string for validation.
+ And we predict the compounds in two step.
+ step 1; we want to find the compounds have incitation behavior. 
+ Thus, finding the "novel" compounds that are similar to "existing" compounds for target RET, BRAF, SRC, S6k
+ step 2; remove the compounds in step 1 that are similar to PDK1's compounds, by doing that we avoid the "novel"
+ compounds which have anti-targets behavior.
+ Therefore, we extract other approved compounds (around 2000 compounds, but not include "existing" compounds) in Drugbank, 
+ and measure the compounds similarity by use there chemical structure since chemical properties of a drug are evidently related to its ultimate therapeutic effect
+ In this challenge, chemical structure of drug in Canonical SMILES form(Simplied Molecular Input Line Entry Specication) are downloaded
+ from DrugBank. The Chemical Development Kit is then applied to computer the similarity of any two drugs as the Tanimoto
+ score via their corresponding 2D chemical fingerprints [1]. After measuring the similarity score, we chose the top-5 compounds which have the largest similarity score.
+ The same processes are applied to Challenge Question 2.
+ Reference;
+ 1) Altshuler, David, Mark Daly, and Leonid Kruglyak. "Guilt by association." Nature genetics 26.2 (2000); 135.
+ 2) Steinbeck, Christoph, et al. "The Chemistry Development Kit (CDK); An open-source Java library for chemo-and bioinformatics." Journal of chemical information and computer sciences 43.2 (2003); 493-500.
+Rationale:
+    Why is your approach innovative?: Guilt by association is widely used in drug-target prediction, it's simple and effectiveness.
+    Why will your approach be generalizable?: The approach is generalizable since we only need the "existing" compounds' SMILE strings and measure chemical structure similarity.
+
+
+Problem 1:
+    - Solution 1:
+        ZINC ID: ZINC18516586
+        VENDOR ID: HY-10571A
+        SMILES string: CC(C)Nc1cccnc1N1CCN(C(=O)c2cc3cc(NS(C)(=O)=O)ccc3[nH]2)CC1
+        VENDOR NAME: MedChem Express Economical
+        Explanation of chemical novelty: we extract the compounds in Drugbank that inhibitor the targets in sub1, then find new compound that are similar to those compounds by their chemical structure.
+    - Solution 2:
+        ZINC ID: ZINC150338755
+        VENDOR ID: HY-15531
+        SMILES string: CC1(C)CCC(CN2CCN(c3ccc(C(=O)NS(=O)(=O)c4ccc(NCC5CCOCC5)c([N+](=O)[O-])c4)c(Oc4cnc5[nH]ccc5c4)c3)CC2)=C(c2ccc(Cl)cc2)C1
+        VENDOR NAME: MedChem Express Economical
+        Explanation of chemical novelty: we extract the compounds in Drugbank that inhibitor the targets in sub1, then find new compound that are similar to those compounds by their chemical structure.
+    - Solution 3:
+        ZINC ID: ZINC66166864
+        VENDOR ID: HY-13011
+        SMILES string: CCc1cc2c(cc1N1CCC(N3CCOCC3)CC1)C(C)(C)c1[nH]c3cc(C#N)ccc3c1C2=O
+        VENDOR NAME: MedChem Express Economical
+        Explanation of chemical novelty: we extract the compounds in Drugbank that inhibitor the targets in sub1, then find new compound that are similar to those compounds by their chemical structure.
+    - Solution 4:
+        ZINC ID: ZINC509
+        VENDOR ID: KS-1086
+        SMILES string: CN1CCN2c3ncccc3Cc3ccccc3[C@@H]2C1
+        VENDOR NAME: KeyOrganics Bioactives
+        Explanation of chemical novelty: we extract the compounds in Drugbank that inhibitor the targets in sub1, then find new compound that are similar to those compounds by their chemical structure.
+    - Solution 5:
+        ZINC ID: ZINC896717
+        VENDOR ID: HY-17492
+        SMILES string: COc1cc(/C(O)=N/S(=O)(=O)c2ccccc2C)ccc1Cc1cn(C)c2ccc(NC(=O)OC3CCCC3)cc12
+        VENDOR NAME: MedChem Express Economical
+        Explanation of chemical novelty: we extract the compounds in Drugbank that inhibitor the targets in sub1, then find new compound that are similar to those compounds by their chemical structure.
+Problem 2:
+    - Solution 1:
+        ZINC ID: ZINC538658
+        VENDOR ID: KS-1315
+        SMILES string: Cc1ccccc1C(=O)Nc1ccc(C(=O)N2CCC[C@@H](O)c3cc(Cl)ccc32)c(C)c1
+        VENDOR NAME: KeyOrganics Bioactives
+        Explanation of chemical novelty: we extract the compounds in Drugbank that inhibitor the targets in sub1, then find new compound that are similar to those compounds by their chemical structure.
+    - Solution 2:
+        ZINC ID: ZINC20148995
+        VENDOR ID: HY-B1305
+        SMILES string: CN(C)CCN(Cc1ccc(Cl)cc1)c1ccccn1
+        VENDOR NAME: MedChem Express Economical
+        Explanation of chemical novelty: we extract the compounds in Drugbank that inhibitor the targets in sub1, then find new compound that are similar to those compounds by their chemical structure.
+    - Solution 3:
+        ZINC ID: ZINC19632927
+        VENDOR ID: HY-17037
+        SMILES string: CN1CCN(CC(=O)N2c3ccccc3C(=O)Nc3cccnc32)CC1
+        VENDOR NAME: MedChem Express Economical
+        Explanation of chemical novelty: we extract the compounds in Drugbank that inhibitor the targets in sub1, then find new compound that are similar to those compounds by their chemical structure.
+    - Solution 4:
+        ZINC ID: ZINC19632618
+        VENDOR ID: HY-15463
+        SMILES string: Cc1ccc(NC(=O)c2ccc(CN3CCN(C)CC3)cc2)cc1Nc1nccc(-c2cccnc2)n1
+        VENDOR NAME: MedChem Express Economical
+        Explanation of chemical novelty: we extract the compounds in Drugbank that inhibitor the targets in sub1, then find new compound that are similar to those compounds by their chemical structure.
+    - Solution 5:
+        ZINC ID: ZINC6745272
+        VENDOR ID: HY-10331
+        SMILES string: CNC(=O)c1cc(Oc2ccc(NC(=O)Nc3ccc(Cl)c(C(F)(F)F)c3)c(F)c2)ccn1
+        VENDOR NAME: MedChem Express Economical
+        Explanation of chemical novelty: we extract the compounds in Drugbank that inhibitor the targets in sub1, then find new compound that are similar to those compounds by their chemical structure.

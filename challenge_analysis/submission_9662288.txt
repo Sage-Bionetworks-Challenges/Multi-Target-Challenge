@@ -1,0 +1,52 @@
+Prediction Methods: A recent paper (doi 10.1021/acs.jcim.7b00316) describes a method (SEA+TC) which combines the Similarity Ensemble Approach with the maximum Tanimoto coefficient (maxTC) to predict binding affinity. In this paper, SEA+TC was performed for all of the compounds present in the ZINC15 database that are available for purchase. The resulting predictions for each target gene are available from the ZINC15 website, where only ligands which are highly similar (maxTC > 40) to ligands already known to bind to each of the targets are considered. \nThe approach we propose uses the SEA+TC predictions (p-value and maxTC) available in ZINC15 to select compounds that may have the ability to bind to multiple targets.\nWe used the Python language to develop a script to access the API from the ZINC15 database and to filter the results according to the criteria specified by the DREAM challenge.\nThe script accepts a list of targets and list of anti-targets as inputs, identified by their gene names. Lists specifiying required targets or required anti-targets can also be passed as inputs.\n\nFirst, we developed two different functions to obtain the information needed for our analysis. The first one accepts a list of genes and retrieves a matrix of the predictions for each gene which contains the four different columns, one has the ZINC ID (which identifies the compound), the second one containing the p-value, the third with the information of maxTc and the last one with the name of the gene being evaluated. This is obtained with the following request, "url = "http://zinc15.docking.org/genes/" + target + "/predictions/subsets/purchasable.json:gene_name+pvalue+maxtc+zinc_id?count=all"". This was used for both targets and anti-targers, for both challenge 1 and 2.\nFor further filtering of the results, we also built another function to retrieve information related to the compounds. With a similar approach to the previous funtion, we accessed the ZINC15 API in order to retrieve information about the compounds to filter the results even further. With the "url = "http://zinc15.docking.org/substances/" + zinc_id + ".json:mwt+hbd+hba+logp+tpsa"", we obtained the molecular weight (mwt), H-bond donors (hbd), H-bond acceptors (hba) and parametric Polar Surface Area (tSPA). The output for this function is a matrix where each row is a compound and the columns are the molecular features described.\n\nTherefore, for each of the targets and anti-targets, the respective SEA+TC predictions were retrieved from the ZINC15 database. The predicted ligands for the first required target was considered the starting point, and then the predicted ligands for any remaining required targets were evaluated against this initial set of ligands. Only the ligands that appeared in the SEA+TC predictions for all of the required targets were kept for the following steps. Afterwards, any ligands that belonged to the set of predictions for any of the required anti-targets were removed from the set of selected ligands. A simmilar approach was then applied to the desired targets, excluding compounds that have not been predicted to have binding affinity with the desired target. However, if none of the predicted ligands for a given desired target belonged to the set of previously selected ligands, the desired target was simply ignored. For desired anti-targets, any of the proposed ligands that also appear in the set of predictions for any of the desired anti-targets were excluded.\nTo further filter the set of selected ligands, we used the data available in ZINC15 for each compound to exclude ligands that did not adhere to Lipinski s rule of 5 and, for challenge 2, to guarantee that the proposed solutions had a polar surface area of less than 75.\nAs a final step, we decided to rank the obtained results using the mean of the p-value and maxTc. Since one of the requirements of this challenge is the requirement of RET (M918T) for challenge 1 and Aurora Kinase A, PAK1 for challenge two, we applied simple weight measures to meet this. So, we calculated the mean for all the p-values for the all the predicitions with a simple twist, the required genes have the weight of 1, where the other genes have the weight of 0.5. This is also applied to the maxTc values. With the means obtained, we ranked first the higher means for the p-value and lower one for the maxTc. We then calculated an average of the two ranks and selected the highest ones.
+
+Rationale:
+    Why is your approach innovative?: Our approach is innovative in many ways. One of the main reasons is the fact that the approach used to make the new predictions for the ZINC database is relatively new (as stated before, the article is around one month old). Due to this, the huge amount of new data generated are still subject to new explorations. With the framework presented for this challenge, we take a naive yet strong approach to tackle the objectives purposed. Also, the framework explored, when taking into the account the SEA algorithm, it can be applied to other databases, enriching the process.
+
+    Why will your approach be generalizable?: Our approach is generalizable because the same method is followed for distinct multi-targeting drug prediction tasks, being independent from the biological questions we intend to address. The only inputs required are a list of targets and a list of anti-targets and the proposed compounds are always selected using nearly the same criteria (in challenge 2 tPSA < 75 was an additional constraint taken into account when selecting compounds). 
+  
+The solutions presented: For all the problems, the solutions presented are ranked according to what is described in the approach.
+Problem 1:
+    - Solution 1:
+        ZINC ID: ZINC000040900273
+        VENDOR ID: Z854859324, MCULE-1723066860
+        SMILES string: Cc1ccc(NC(=O)c2cccc(C(F)(F)F)c2)cc1NC(=O)c1ccncc1
+        VENDOR NAME: EnamineStore, Mcule Make-on-demand
+        Explanation of chemical novelty: Since it has only been presented in one paper, this could be an interesting target to study since the prediction values are good.
+    - Solution 2:
+        ZINC ID: ZINC000495355936
+        VENDOR ID: Z915509806
+        SMILES string: Cc1ccc(NC(=O)c2ccc3ncccc3c2)cc1C(F)(F)F
+        VENDOR NAME: EnamineStore
+        Explanation of chemical novelty: There is no actual presented activities for this compound, so this could be an important time to evaluate this compound.
+    - Solution 3:
+        ZINC ID: ZINC000040848081
+        VENDOR ID: Z854859336
+        SMILES string: Cc1ccc(NC(=O)c2cccc(C(F)(F)F)c2)cc1NC(=O)c1cccnc1
+        VENDOR NAME: EnamineStore
+        Explanation of chemical novelty: The activity of this compound has only been seen on CSF1R gene. By testing this, we could increase the knowledge of the activity of this compound.
+    - Solution 4:
+        ZINC ID: ZINC000242823397
+        VENDOR ID: 183500257, MolPort-043-924-824, 9339742
+        SMILES string: COc1ccc(NC(=O)c2ccnc(NCCN3CCOCC3)c2)cc1OC
+        VENDOR NAME: eMolecules, Molport Make-on-demand, Otava (Virtual)
+        Explanation of chemical novelty: Again, since there is no information about this compound, this could be an opportunity to see if the compound could be useful. 
+Problem 2:
+    - Solution 1:
+        ZINC ID: ZINC000243009863
+        VENDOR ID: 184290336, MolPort-043-419-559, 9599505
+        SMILES string: COc1ccccc1N1CCN(c2ccnc(Nc3cccc(Cl)c3)n2)CC1
+        VENDOR NAME: eMolecules, Molport Make-on-demand, Otava (Virtual)
+        Explanation of chemical novelty: Again, there is no current knowledge about this compound. With this in mind, this could be an opportunity to evaluate this new compound.
+    - Solution 2: 
+        ZINC ID: ZINC000243869348
+        VENDOR ID: 184259625, MolPort-044-173-197, 9589268
+        SMILES string: CN1CCN(c2ccnc(Nc3ccc(Cl)c(Cl)c3)n2)CC1
+        VENDOR NAME: eMolecules, Molport Make-on-demand, Otava (Virtual)
+        Explanation of chemical novelty: The same reason as the previous compound. There are no records for the activity of this compound.
+    - Solution 3:
+        ZINC ID: ZINC000084604873
+        VENDOR ID: 260258169, DA-22711, 260258169, 1341200-40-5
+        SMILES string: Cc1cnc(Nc2ccc(CN3CCN(C)CC3)cc2)nc1-c1cccc(Cl)c1
+        VENDOR NAME: eMolecules, Debye Scientific Building Blocks, eMolecules Building Blocks, Hong Kong Chem Here 
+        Explanation of chemical novelty: This compound has a known interaction with AXL, another kinase. This could be important since our targets are also kinases.

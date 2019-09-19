@@ -1,0 +1,69 @@
+Prediction Methods: The full procedure can be described in three phases, a) a QSAR modeling phase; b) ZINC15 database screening and finally c) Manual curation of the most promising candidates. QSAR MODELING. We set a binary classification QSAR modelling pipeline for all targets and anti-targets of both sub-challenges. We collected data from ChEMBL database. All chemical structures were curated, cleaned and standardized by removing mixtures (handling of unconnected molecules), salt groups, missing data and duplicates. To handle duplicate values for the same molecule the median of activity values was calculated. For this study, only antagonistic Ki, Kd, AC50, EC50, residual activity or activity values were fetched to include data relating to the enzyme inhibition and to ensure that enzyme Binding and inhibition and not binding/inhibition data was considered. After data preparation, all chemical structures were translated using RDKit 2D-descriptors and torsion fingerprints. A combination of which was used to build classification QSAR models for all targets and anti-targets. Positive and negative classes were assigned to all datasets according to the given conditions in the multi-targeting drug DREAM challenge. Moreover, we included all molecules defined by ChEMBL known to be inactive or not active to consider non-binder against all targets (as negatives) and anti-targets (as positives). A state-of-the-art hybrid machine learning procedure was used for the all the models[1]. This procedure couples a RandomForest (RF) based feature selection process was applied to identify and stringently select the most relevant features that are the most adequate for the understudy problems. Before features selection, all datasets were randomly divided into 5-folds to calculate RF based variable importance (VI) from each fold.  Thus, features selection approach counts variable importance by calculating the average Mean Decrease Accuracy (MDA) and Mean Decrease Gini (MDG) provided by RF from a series of runs as a tool to rank the predictors. Finally, datasets were again randomly split into training and test sets and the RF VI-based ranked variables were feed to Support Vectors Machines to build the stepwise predictive models and to find a better balance between the biologically relevant set of features and model prediction. An optimised number of features that performed best (maximum predictive performance) across all 5-folds was selected as set of most relevant features. Each model's performance was assessed using the Matthews Coefficient Correlation (MCC). Final QSAR models for all problems were generated using the whole training data with the selected optimized number of features. ZINC15 DATABASE SCREENING. For the database screening all 13,088,593 molecules from ZINC15 database were downloaded applying the filters as purchasable and in-stock molecules. The same RDKit 2D-descriptors and torsion fingerprints were calculated for all molecules and predictions were made from the generated QSAR models for Challenge Questions 1 and 2 for both targets and anti-targets. All screened molecules were ranked using Challenge Question 1 and 2 scoring schemes. In this way, 1325 top-ranked molecules for Challenge Question 1 and 12031 top ranked molecules for Challenge Question 2. Since, model predictability is considered more reliable if the external test molecules fall within the applicability domain (AD) of the predictive models. To analyse the AD of the generated models, Euclidean distances based on the selected number of features (descriptors and torsion fingerprints) for each model were used among all training compounds of corresponding models and the zinc15 compounds.  Moreover, the Tanimoto coefficient (ECFP6) was calculated for top-ranked set of compounds to their nearest neighbours in the training set of all targets and anti-targets so to identify the most reliable predictions. All candidate molecules were re-ranked by removing the molecules whose nearest neighbours were from negative classes. After this stringent screening, only 43 molecules were left for Challenge Question 1 and 989 molecules for Challenge Question 2. To eliminate very similar candidate molecules, these were clustered together making sure that each cluster center was far from all the other clusters at least 0.5 using ECFP6 fingerprints. From the top clusters with more consistent and highest predictions, the more promising candidate, the one with the highest score) was selected. MANUAL CURATION. A final manual curation of the best candidate molecules was performed by searching ZINC referenced suppliers for each molecule to ensure that the purchasability of each candidate is within the specifications of the challenge. Also each structure was further searched in SureChembl to verify whether each candidate was not the subject of a previous patent in any of the targets or anti-targets. REFERENCE. Kausar, S. & Falcao, A. O. An automated framework for QSAR model building. J. Cheminform. 10, 1 (2018).
+
+
+Rationale: 
+    Why is your approach innovative?: There are several innovative issues to the way this screening was conducted. a) the Random Forest Feature Selection procedure, despite having been published by this team, is far from main stream, as well as the automated procedure where the full hybrid methodology has been developed; b) The successsive refinement of the database screening is, to our knowledge, new. It couples the selection of molecules withion the applicability domain to a stringent selection of different candidates through a scalable clustering procedue that ensures that only sufficinetly different candidate molecules are submitted.
+    Why will your approach be generalizable?: With the exception of the final manual curation procedure which operates on the very best candidates, there is very small manual intervention in the full procedure. In effect after the training datasets were produced for each target of both challenges, the same procedure was autometed and applied to both. Therefore we strongly believe this procedure is generalizable.
+
+Problem 1:
+    - Solution 1:
+        ZINC ID: ZINC000008718698 
+        VENDOR ID: MCULE-9456990225
+        SMILES string: COc1ccc(Br)cc1CN(C)CC(=O)Nc1c(C)n(C)n(-c2ccccc2)c1=O
+        VENDOR NAME: Mcule
+        Explanation of chemical novelty: There are no experimentally validated annotation of this molecules for our targets and not found in SureChembl.
+    - Solution 2:
+        ZINC ID: ZINC000035946120
+        VENDOR ID: V029-6643
+        SMILES string: CC(C)NC(=O)N(Cc1cc(NC(=O)c2ccccc2Cl)ccc1N(C)C)CC1CC1
+        VENDOR NAME: ChemDiv
+        Explanation of chemical novelty: There are no experimentally validated annotation of this molecules for our targets and not found in SureChembl.
+    - Solution 3:
+        ZINC ID: ZINC000100714025
+        VENDOR ID: R535109|ALDRICH
+        SMILES string: CCN(CC)c1ccc(/C=N/c2c(C)n(C)n(-c3ccccc3)c2=O)c(O)c1
+        VENDOR NAME: Aldrich CPR
+        Explanation of chemical novelty: There are no experimentally validated annotation of this molecules for our targets and not found in SureChembl.
+    - Solution 4:
+        ZINC ID: ZINC000072165851
+        VENDOR ID: MCULE-4033243382
+        SMILES string: COc1ccc(-n2ccnc2-c2c(C)n(C)n(-c3ccccc3)c2=O)cn1
+        VENDOR NAME: Mcule
+        Explanation of chemical novelty: There are no experimentally validated annotation of this molecules for our targets and not found in SureChembl.
+    - Solution 5:
+        ZINC ID: ZINC000019626956
+        VENDOR ID: MCULE-3745753976
+        SMILES string: COC(=O)COc1ccc(OC)c(NC(=O)c2c(C)n(C)n(-c3ccccc3)c2=O)c1
+        VENDOR NAME: Mcule
+        Explanation of chemical novelty: There are no experimentally validated annotation of this molecules for our targets and not found in SureChembl.
+Problem 2:
+    - Solution 1:
+        ZINC ID: ZINC000010213695
+        VENDOR ID: MCULE-5526562762MCULE-9647925319
+        SMILES string: Cc1cccc(Nc2nc(Nc3ccc(C)c(C)c3)nc(N3CCCC3)n2)c1
+        VENDOR NAME: Mcule
+        Explanation of chemical novelty: There are no experimentally validated annotation of this molecules for our targets and not found in SureChembl.
+    - Solution 2:
+        ZINC ID: ZINC000019359000
+        VENDOR ID: MCULE-3630729024MCULE-4308257206
+        SMILES string: COc1cc(CN2CCN(Cc3cccc4ccccc34)CC2)cc(OC)c1O
+        VENDOR NAME: Mcule
+        Explanation of chemical novelty: There are no experimentally validated annotation of this molecules for our targets and not found in SureChembl.
+    - Solution 3:
+        ZINC ID: ZINC000019366532
+        VENDOR ID: MCULE-1506743248
+        SMILES string: Oc1ccc2ccccc2c1CN1CCN(Cc2c(O)ccc3ccccc23)CC1
+        VENDOR NAME: Mcule
+        Explanation of chemical novelty: There are no experimentally validated annotation of this molecules for our targets and not found in SureChembl.
+    - Solution 4:
+        ZINC ID: ZINC000041005045
+        VENDOR ID: MCULE-7312887920
+        SMILES string: CCOc1ccc2ccccc2c1-c1nc2ccccc2[nH]1
+        VENDOR NAME: Mcule
+        Explanation of chemical novelty: There are no experimentally validated annotation of this molecules for our targets and not found in SureChembl.
+    - Solution 5:
+        ZINC ID: ZINC000089794014
+        VENDOR ID: MCULE-7481034537
+        SMILES string: O=C(Nc1ccc2c(ccn2CCN2CCOCC2)c1)N1CCN(Cc2cccnc2)CC1
+        VENDOR NAME: Mcule
+        Explanation of chemical novelty: There are no experimentally validated annotation of this molecules for our targets and not found in SureChembl.    

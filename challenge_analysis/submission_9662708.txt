@@ -1,0 +1,162 @@
+Prediction Methods: |
+    Using convolutional neural network to score pharmacophore aligned poses with limited pose sensitivity.
+
+    Representative structures for the desired targets were manually selected from the PDB and aligned. High resolution, ligand-bound, human protein structures were preferred.  At most 3 structures were selected for each target.
+
+    For Problem 1
+    ret   2ivu 2x2k 5fm2 5amn
+    braf  5ita 5vam
+    src   1y57 2src
+    s6k   3wf8 3a60
+    mknk1 5wvd
+    ttk   4o6l 5n93
+    erk8  no structures
+    pdk1  5lvl 3nax
+    pak3  6fd3
+
+    For Problem 2
+    aurora 4uyn  4j8m 3fdn
+    pak1   4oth 5dew
+    fgfr1  4uwc 4uxq
+    lkb1   no bound structures
+    pak3   6fd3
+    tak1   5v5n 2yiy
+    pik3ca 5dxt 5ubr
+
+
+    The ligand bound structures for the primary targets (i.e. ret and aurora/pak1) were used as the bases for a pharmacophore search.  The receptor and ligand were uploaded to the Pharmit search engine (http://pharmit.csb.pitt.edu), which automatically identified an interaction pharmacophore.  The radius of all features was set to 1A.  If the default pharmacophore was too specific, features were manually removed until the query returned a reasonable number of hits (at least in the hundreds).  Solvent exposed features were preferentially removed.  If the query was two broad, direction constrains were selectively added to hydrogen bond features to narrow the scope of the query. The MolPort library of 7 million commericially available compounds was searched. All the hits matching the query in addition to structures minimized in pharmit (using the AutoDock Vina scoring function) were downloaded.
+
+    These poses were then scored against all the protein structures using a gnina (http://github.com/gnina) and a 3D convolutional neural network that was trained on the PDBbind refined set to predict binding affinities.  The model used here was trained only on reasonable docked poses and so has not learned to penalize steric clashes.
+
+    Scored compounds were then filtered to create a ranked list of compounds deemed responsive to the challenge.  Affinity thresholds were manually tuned to select compounds with the desired relationships.  Chemical novelty is assessed by comparing to the ChEMBL activity sets corresponding to the protein targets.  The maximum Tanimoto (as calculatd by the default RDKit fingerprints) to _any_ ChEMBL compound in these sets is recorded.  Compounds with Tanimoto > 0.7 are excluded.
+
+    Note that ten solutions are provided, in ranked order, in case there are difficulties acquiring the first five or there is sufficient budget to acquire additional compounds. 
+
+Rationale:
+    Why is your approach innovative?:  The approach uses a convolutional neural network trained on a direct representation of the 3D structure of a protein-ligand complex to predict binding affinities.  Such 3D deep learning approaches to structure based drug design are relatively new, having only emerged in the last few years, and have yet to be subjected to extensive prospective evaluation, as enabled by the DREAM challenge.  This particular submission is unique in that we are explicitly using a model that is tolerant of steric clashes and (hopefully) will correctly score pharmacophore aligned poses without refining the ligand position.
+    
+    Why will your approach be generalizable?: This approach builds upon established structure-based drug design workflows and can be applied to any target with a known receptor.
+
+
+Problem 1:
+    - Solution 1:
+        ZINC ID: ZINC000067911340
+        VENDOR ID: MolPort-005-945-291
+        SMILES string: COc1cc(c2c(c1)oc(c(c2=O)c1c(cc(c2c1oc(cc2=O)c1ccc(cc1)O)O)O)c1ccc(cc1)O)O
+        VENDOR NAME: MolPort
+        Explanation of chemical novelty: Tanimoto=0.596477 src=7.202710 pak3-1=8.865550 pdk1-1=7.980150 s6k=7.443580 mknk1-3=8.007800 ttk-1=8.253620 ret=9.071110 braf=7.707130
+    - Solution 2:
+        ZINC ID: ZINC000096085369
+        VENDOR ID: MolPort-039-338-970
+        SMILES string: COc1ccc(cc1)[C@@H]1[C@H]([C@@H]2C(=O)c3c(cc(cc3O[C@@H]2c2ccc(cc2)O)O)O)C(=O)c2c(cc(cc2O1)OC)O
+        VENDOR NAME: MolPort
+        Explanation of chemical novelty: Tanimoto=0.545068 src=7.819430 pak3-1=8.638160 pdk1-1=8.557120 s6k=7.661320 mknk1-3=7.459990 ttk-1=8.784440 ret=8.861160 braf=7.589300
+    - Solution 3:
+        ZINC ID: ZINC000095913548
+        VENDOR ID: MolPort-039-338-895
+        SMILES string: COc1cc(c2c(c1)O[C@@H]([C@@H](C2=O)[C@H]1[C@@H](c2ccc(cc2)O)Oc2cc(cc(c2C1=O)O)O)c1ccc(cc1)O)O
+        VENDOR NAME: MolPort
+        Explanation of chemical novelty: Tanimoto=0.545997 src=7.677360 pak3-1=8.437050 pdk1-1=8.095580 s6k=7.439030 mknk1-3=7.260620 ttk-1=8.574550 ret=8.624020 braf=7.485800
+    - Solution 4:
+        ZINC ID: 
+        VENDOR ID: MolPort-042-645-765
+        SMILES string: CC[C@H](C)[C@H](C(=O)Nc1cc2c(cc1)[nH]c(CCc1ccccc1)n2)Nc1ccc2-c3c(CC[C@@H](c2cc1=O)NC(=O)C)cc(c(c3OC)OC)OC
+        VENDOR NAME: MolPort
+        Explanation of chemical novelty: Tanimoto=0.674571 src=6.941540 pak3-1=7.525330 pdk1-1=7.669240 s6k=7.489600 mknk1-3=7.387870 ttk-1=8.401290 ret=8.427920 braf=6.486890
+    - Solution 5:
+        ZINC ID: 
+        VENDOR ID: MolPort-019-936-923
+        SMILES string: CC(=CCC[C@@](C)([C@@H]1CC[C@@]2([C@H]1[C@@H](C[C@H]1[C@]2(C[C@@H]([C@@H]2[C@]1(CC[C@H](C2(C)C)O)C)O[C@H]1[C@@H]([C@H]([C@@H]([C@@H](CO)O1)O)O)O[C@H]1[C@@H]([C@H]([C@@H](CO1)O)O)O)C)O)C)O)C
+        VENDOR NAME: MolPort
+        Explanation of chemical novelty: Tanimoto=0.419698 src=8.352460 pak3-1=8.185400 pdk1-1=7.660210 s6k=7.981660 mknk1-3=7.116460 ttk-1=8.042210 ret=8.351780 braf=8.339820
+    - Solution 6:
+        ZINC ID: 
+        VENDOR ID: MolPort-044-521-040
+        SMILES string: CCNS(=O)(=O)c1ccccc1S(=O)(=O)Nc1ccc2c(c1)CN(C)C(=O)N2
+        VENDOR NAME: MolPort
+        Explanation of chemical novelty: Tanimoto=0.509615 src=7.215470 pak3-1=7.954990 pdk1-1=8.069670 s6k=7.133740 mknk1-3=7.274000 ttk-1=6.911060 ret=8.286370 braf=7.603270
+    - Solution 7:
+        ZINC ID: ZINC000000354329
+        VENDOR ID: MolPort-000-279-564
+        SMILES string: c1(cc(cc(c1O)C(C)C)NS(=O)(=O)c1c(N)cccc1)C(C)C
+        VENDOR NAME: MolPort
+        Explanation of chemical novelty: Tanimoto=0.435530 src=7.044640 pak3-1=7.428440 pdk1-1=7.496350 s6k=6.663220 mknk1-3=6.509820 ttk-1=7.015780 ret=8.122230 braf=6.804350
+    - Solution 8:
+        ZINC ID: ZINC000009377085
+        VENDOR ID: MolPort-005-795-453
+        SMILES string: Nc1n[nH]c(CCCCCNC(=O)c2ccc(cc2)S(=O)(=O)Nc2ccc(cc2)F)c1C#N
+        VENDOR NAME: MolPort
+        Explanation of chemical novelty: Tanimoto=0.530355 src=6.844180 pak3-1=7.276990 pdk1-1=7.018430 s6k=6.434700 mknk1-3=6.888610 ttk-1=7.281150 ret=7.976400 braf=6.376420
+    - Solution 9:
+        ZINC ID: ZINC000096115072
+        VENDOR ID: MolPort-028-855-651
+        SMILES string: c1(c2cnn(c2nc2c1oc1c(C)c(O)ccc21)C(C)C)c1cc(c(c(c1)O)O)OC
+        VENDOR NAME: MolPort
+        Explanation of chemical novelty: Tanimoto=0.663972 src=6.690050 pak3-1=7.308890 pdk1-1=7.063310 s6k=6.097180 mknk1-3=6.745940 ttk-1=6.839280 ret=7.889260 braf=6.707610
+    - Solution 10:
+        ZINC ID: 
+        VENDOR ID: MolPort-045-915-586
+        SMILES string: COc1cc2ccc1OCC(=O)NCCCNCCCCNC(=O)[C@@H]([C@H](C)O)NC(=O)[C@@H](CC(C)C)NC(=O)CC2
+        VENDOR NAME: MolPort
+        Explanation of chemical novelty: Tanimoto=0.618286 src=6.519400 pak3-1=6.886070 pdk1-1=7.048960 s6k=6.026080 mknk1-3=5.821110 ttk-1=7.132460 ret=7.594810 braf=5.971040
+Problem 2:
+    - Solution 1:
+        ZINC ID: ZINC000150340658
+        VENDOR ID: MolPort-016-580-907
+        SMILES string: Cc1cc(=O)oc2c1ccc(c2)NC(=O)[C@H](CCC(=O)O)NC(=O)[C@H](CC(C)C)NC(=O)[C@H](CC(C)C)NC(=O)OCc1ccccc1
+        VENDOR NAME: MolPort
+        Explanation of chemical novelty: Tanimoto=0.560727 pak3-3=7.413280 aurora=8.564800 tak1-3=7.968470 pik3ca-1=6.844350 pak1=9.232770 fgfr1=7.899540
+    - Solution 2:
+        ZINC ID: ZINC000032927046
+        VENDOR ID: MolPort-009-641-699
+        SMILES string: CC(C)N(CCNS(=O)(=O)c1ccc(c(c1)[N+](=O)[O-])NCc1cc[nH]n1)C(C)C
+        VENDOR NAME: MolPort
+        Explanation of chemical novelty: Tanimoto=0.540444 pak3-3=5.711590 aurora=6.367070 tak1-3=5.787760 pik3ca-1=5.377990 pak1=6.558820 fgfr1=6.141540
+    - Solution 3:
+        ZINC ID: 
+        VENDOR ID: MolPort-045-915-960
+        SMILES string: COCCCN1Cc2cc(c(cc2)OC)Oc2cc(CO[C@@H]3CCN(C[C@@H]3NC(=O)C1)C(=O)c1ccc3c(c1)nn[nH]3)ccc2
+        VENDOR NAME: MolPort
+        Explanation of chemical novelty: Tanimoto=0.528239 pak3-3=5.318060 aurora=6.219700 tak1-3=5.418300 pik3ca-1=5.942040 pak1=6.834830 fgfr1=5.960940
+    - Solution 4:
+        ZINC ID: ZINC000009509579
+        VENDOR ID: MolPort-004-094-563
+        SMILES string: COc1ccccc1NC(=O)c1ccc(cc1)NC(=O)CCN1C(=O)c2ccccc2C1=O
+        VENDOR NAME: MolPort
+        Explanation of chemical novelty: Tanimoto=0.505387 pak3-3=5.512520 aurora=6.161180 tak1-3=5.326870 pik3ca-1=4.777780 pak1=6.596950 fgfr1=5.724830
+    - Solution 5:
+        ZINC ID: ZINC000029828001
+        VENDOR ID: MolPort-009-593-551
+        SMILES string: COc1ccc(CCN(C)C(=O)CSc2nnc(Nc3cccc(C)c3)s2)cc1OC
+        VENDOR NAME: MolPort
+        Explanation of chemical novelty: Tanimoto=0.408115 pak3-3=5.049610 aurora=5.811150 tak1-3=5.086820 pik3ca-1=4.372320 pak1=5.624710 fgfr1=5.752320
+    - Solution 6:
+        ZINC ID: 
+        VENDOR ID: MolPort-028-730-964
+        SMILES string: O=C(c1cccc(c1)S(=O)(=O)NCc1cc[nH]n1)NC[C@H]1OCCOC1
+        VENDOR NAME: MolPort
+        Explanation of chemical novelty: Tanimoto=0.427032 pak3-3=4.898510 aurora=5.751490 tak1-3=5.076800 pik3ca-1=4.691640 pak1=5.719520 fgfr1=5.946270
+    - Solution 7:
+        ZINC ID: ZINC000009884489
+        VENDOR ID: MolPort-005-328-937
+        SMILES string: CCOC(=O)c1c(NC(=O)CSc2nnc(C)c(=O)n2N)sc(C)c1C
+        VENDOR NAME: MolPort
+        Explanation of chemical novelty: Tanimoto=0.553655 pak3-3=5.119570 aurora=5.666640 tak1-3=5.052490 pik3ca-1=4.229370 pak1=6.479960 fgfr1=5.172320
+    - Solution 8:
+        ZINC ID: ZINC000096309558
+        VENDOR ID: MolPort-044-560-719
+        SMILES string: C[C@@H]1[C@H]([C@@H]([C@H]([C@H](O1)O[C@@H]1[C@@H](CO)O[C@@H]([C@@H]([C@@H]1O)O)O[C@H]([C@@H](CO)O)[C@@H]([C@H](C=O)O)O)O)O)N[C@H]1C=C([C@H]([C@@H]([C@H]1O)O)O)CO
+        VENDOR NAME: MolPort
+        Explanation of chemical novelty: Tanimoto=0.486757 pak3-3=3.720480 aurora=5.122080 tak1-3=4.598510 pik3ca-1=3.909720 pak1=5.814780 fgfr1=4.588220
+    - Solution 9:
+        ZINC ID: 
+        VENDOR ID: MolPort-001-741-535
+        SMILES string: CC(=O)N[C@@H]1[C@H]([C@@H]([C@@H](CO[C@H]2[C@@H]([C@H]([C@@H](CO2)O[C@@H]2[C@@H]([C@](CO2)(CO)O)O)O[C@@H]2[C@H]([C@@H]([C@@H](CO2)O)O)O)O)O[C@H]1O[C@H]1CC[C@]2([C@H](C1(C)C)CC[C@@]1([C@H]2CC=C2[C@]1(C[C@@H]([C@@]1([C@H]2CC(CC1)(C)C)C(=O)O[C@@H]1[C@H]([C@@H]([C@@H](CO1)O)O)O)O)C)C)C)O)O
+        VENDOR NAME: MolPort
+        Explanation of chemical novelty: Tanimoto=0.560634 pak3-3=4.130950 aurora=5.012430 tak1-3=3.764290 pik3ca-1=4.017180 pak1=6.138050 fgfr1=4.267020
+    - Solution 10:
+        ZINC ID: ZINC000075352807
+        VENDOR ID: MolPort-010-846-490
+        SMILES string: CCOC(=O)c1c(C)[nH]c(CCC(=O)NCCCN2CCOCC2)c1C
+        VENDOR NAME: MolPort
+        Explanation of chemical novelty: Tanimoto=0.484448 pak3-3=4.261170 aurora=4.908140 tak1-3=4.301910 pik3ca-1=4.085280 pak1=5.825020 fgfr1=4.984630

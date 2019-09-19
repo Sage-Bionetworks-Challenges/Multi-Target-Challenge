@@ -1,0 +1,93 @@
+Prediction Methods: |
+        Prediction of Kinases Inhibition with Multi-task Ensemble Learning Model
+
+        I obtained a dataset of inhibition assay on 15 enzymes that are targets and antitarget of Problem 1 and 2.
+        Compounds in ZINC15 were filtered based on criteria below\:
+        (1) Its purchasability is "in stock".
+        (2) It satisfies at least 3 of 4 criteria in Lipinski's rule.
+        (3) Its TPSA was smaller than 75 angstroms squared.
+
+        Fingerprints were generated for each compound in the dataset.
+        Here 8 kinds of fingerprints, namely ECFP, FCFP, Atom Pairs, Topological Torsion, Avalon and RDKit Fingerprint were generated on all compounds.
+        Regression models of Random Forest were trained with each of fingerprints independently.
+        Then the models were ensembled by a logistic regression model using stacked generalization.
+
+        When a hash function was applied to the raw fingerprint, a technique proposed by Weinberger et al was adopted
+        in order to solve the questions in multi-task learning paradigm.
+        As a result, the single ensembled model predicted inhibition activity to all the enzymes.
+        Expected values of scores were calculated for each compound in the library based on the probability estimates by the model.
+        Finally, 5 compounds giving the highest expected values of score were submitted to the organizer of this challenge.
+
+Rationale:
+    Why is your approach innovative?: |
+            (1) Ensemble of multiple fingerprints.
+                While multiple learning algorithms are ensembled in usual stacked generalization,
+                multiple fingerprints are done here. Better predictive performance is expected than each of individual fingerprints.
+            (2) Hybrid of regression and classification.
+                The ensembled model is composed of two kinds of learners\: Random Forest regressors and a logistic regression classifier.
+                Each of the formers accepts a fingerprint as a feature vector, and predicts inhibition rates of each compound.
+                Then the latter accepts predictions of the formers, and predict whether the inhibition rates are higher than threshold or not.
+                Hereby the ensembled model is trained with quantitative data, and gives probabilities of binary classification at last.
+                This mechanism enables to calculate expected values of scores with less information loss caused by binning of inhibition rates.
+                
+    Why will your approach be generalizable?: |
+            If training data were provided, my model could be fitted to any targets and off-targets very easily.
+            In addition, the single model could be generalizable to multiple problems because of multi-task learning.
+            Actually Problem 1 and 2 were solved using a common model in this challenge.
+
+Problem 1:
+    - Solution 1:
+        ZINC ID: ZINC000022200171
+        VENDOR ID: MolPort-004-757-286
+        SMILES string: NNc1ccc(Cl)nc1
+        VENDOR NAME: Molport SC Economical
+        Explanation of chemical novelty: Maximum Tanimoto similarity to known targets is 0.271.
+    - Solution 2:
+        ZINC ID: ZINC000239174455
+        VENDOR ID: MolPort-001-621-400
+        SMILES string: O=C1[C@@H]2[C@H]3CC[C@@H](C3)[C@H]2C(=O)N1c1ccc(N2C(=O)[C@H]3[C@H]4CC[C@@H](C4)[C@H]3C2=O)c(Cl)c1
+        VENDOR NAME: Molport SC Economical
+        Explanation of chemical novelty: Maximum Tanimoto similarity to known targets is 0.146.
+    - Solution 3: 
+        ZINC ID: ZINC000000368219
+        VENDOR ID: MolPort-002-220-470
+        SMILES string: COc1cc(C)c(/C=C2/NC(=O)NC2=O)cc1C(C)C
+        VENDOR NAME: Molport SC Economical
+        Explanation of chemical novelty: Maximum Tanimoto similarity to known targets is 0.217.
+    - Solution 4: 
+        ZINC ID: ZINC000008729997
+        VENDOR ID: MolPort-001-757-541
+        SMILES string: NNc1ccc(Cl)cn1
+        VENDOR NAME: Molport SC Economical
+        Explanation of chemical novelty: Maximum Tanimoto similarity to known targets is 0.179.
+    - Solution 5: 
+        ZINC ID: ZINC000247779175
+        VENDOR ID: MolPort-002-808-838
+        SMILES string: O=C1[C@@H]2[C@H]3C=C[C@@H](C3)[C@H]2C(=O)N1c1ccc(N2C(=O)[C@H]3[C@H]4C=C[C@@H](C4)[C@H]3C2=O)c(Cl)c1
+        VENDOR NAME: Molport SC Economical
+        Explanation of chemical novelty: Maximum Tanimoto similarity to known targets is 0.146.
+Problem 2:
+    - Solution 1:
+        ZINC ID: ZINC000004165365
+        VENDOR ID: MolPort-001-933-900
+        SMILES string: CC1=C(C(=O)Nc2ccccc2C)[C@@H](c2ccc(Br)cc2)NC(=O)N1
+        VENDOR NAME: MolPort SC Economical
+        Explanation of chemical novelty: Maximum Tanimoto similarity to known targets is 0.375.
+    - Solution 3: 
+        ZINC ID: ZINC000000070848
+        VENDOR ID: MolPort-001-951-773
+        SMILES string: CC1=C(C(=O)Nc2ccccc2C)[C@H](c2ccc(F)cc2)NC(=O)N1
+        VENDOR NAME: MolPort SC Economical
+        Explanation of chemical novelty: Maximum Tanimoto similarity to known targets is 0.500.
+    - Solution 4: 
+        ZINC ID: ZINC000005560248
+        VENDOR ID: MolPort-004-256-659
+        SMILES string: CC1=C(C(=O)Nc2ccccc2C(F)(F)F)[C@H](c2ccc(Cl)cc2)NC(=O)N1
+        VENDOR NAME: MolPort SC Economical
+        Explanation of chemical novelty: Maximum Tanimoto similarity to known targets is 0.366.
+    - Solution 5: 
+        ZINC ID: ZINC000001189603
+        VENDOR ID: MolPort-002-173-303
+        SMILES string: CC1=C(C(=O)Nc2ccccc2Cl)[C@@H](c2ccc(C)cc2)NC(=O)N1
+        VENDOR NAME: MolPort SC Economical
+        Explanation of chemical novelty: Maximum Tanimoto similarity to known targets is 0.371.

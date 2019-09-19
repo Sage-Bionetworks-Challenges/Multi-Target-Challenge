@@ -1,0 +1,80 @@
+Prediction Methods: We made a prediction of ZINC compounds through a total of three steps. The description of the three steps are as follows.<Step 1 Kinase inhibitor candidate extraction> KIEO(tanlab.ucdenver.edu/KIEO/KIEOv1.0/) is KInase Experiments Omnibus, developed by one of our team members, Professor Aik-Choon Tan of the University of Colorado. The KIEO database was constructed by collecting and curating published experimental data of kinase inhibitors from more than 600 articles. We utilized KIEO to identify kinase inhibitor candidates that satisfy the conditions given in Subchallenge 1 and 2. Some of our answers include the kinase inhibitors found in Step 1 (Figure1A is available at infos.korea.ac.kr/dmis_mtd)  <Step 2 Choosing a ZINC chemical compound candidates with a response similar to the kinase inhibitor candidates via the Cmap score predictor? We designed a deep-learning based Cmap score predictor. The Cmap score is a similarity score between two compounds obtained from the perturbation-driven gene expression dataset, called Connectivity map(Cmap), provided by Broad institute[1]. We can extract the Cmap scores of 2.8M compound pairs of 2400 single compounds. Top 5% and bottom 5% of the cmap score are used for our deep learning model. Our model is a classification model that is predicting True and False labels representing similarities for each pair of compounds. The input of the model is pairs of fingerprints of two chemical compounds. Once input pairs and corresponding scores (Cmap scores) are given, we feed each input pair to our Siamese network. If trained properly, the Siamese network is able to predict Cmap scores of unseen input pairs where one of the fingerprints (or both of them) is not seen during training. Overview of our model is illustrated in Figure 1B which is available at infos.korea.ac.kr/dmis_mtd. Motivated by the work of Koch [2], we share the weights of two multilayer perceptrons to build a Siamese network. We feed two different inputs to two separate MLPs that share weights, and gather the outputs of each MLP. Outputs of the MLPs are used for predicting the Cmap scores of the two fingerprint inputs. We compute the weighted L2 distance of two outputs, and using sigmoid function, the distance is transformed into a probability of classifying Cmap score as 1. For MLPs, we used 3 fully connected layers with hidden dimension set to 100 and sigmoid nonlinearity between the layers. For evaluating our model, we set up a real world experimental environment where responses of some drugs are known, but some are not. We wanted to know the similarity between well-known and unknown drugs, or between unknown drugs. Therefore we randomly divided the drugs in Cmap into 90% and 10%. 10% of the drugs were excluded from the training set and included only in the validation set and test set. Our Siamese Network achieved 0.755 of F1 score in all test pairs with 0.866, 0.694, 0.647 of F1 scores for the pairs of the known drugs and the known drugs, the pairs of the known drugs and the unknown drugs, and the pairs of the unknown drugs and unknown drugs, respectively. For submitting to DREAM Challenge, we generated pairs of compounds to be tested. One pair is a combination of two compounds and each compound is from kinase inhibitor found in Step 1 and a chemical compound in ZINC chemical compounds.   <Step 3> Filtering out ZINC chemical compound candidates through Lipinski's rules, patent search and protein-ligand docking prediction algorithm. Through the process up to step 2, we were able to select several ZINC chemical compound candidates. We checked Lipinski's rules, searched patents through PubChem, and considered predicted binding affinity using protein-ligand docking algorithm for filtering out ZINC chemical compound candidates (Figure 1C). ref 1. Subramanian, Aravind, et al. "A next generation connectivity map; L1000 platform and the first 1,000,000 profiles." Cell 171.6 (2017) ref 2. Koch, Gregory, Richard Zemel, and Ruslan Salakhutdinov. "Siamese neural networks for one-shot image recognition." ICML Deep Learning Workshop. Vol. 2. 2015.
+
+
+
+Rationale:
+    Why is your approach innovative?: Our method is innovative in several ways. The first one is that we were able to find kinase inhibitors that meet all the criteria by searching on KIEO, KInase Experiment Omnibus. Second, we generated a deep learning-based Siamese network model. The model predicts the similarity of gene expression level effects using only the structural information of two compounds.
+    Why will your approach be generalizable?: Our Siamese network can be generalized because it performs well for drugs that have no knowledge of the reactivity. Siamese network is well known for its ability to predict the degree of similarities of unseen input pairs.
+
+
+
+Problem 1:
+    - Solution 1:
+        ZINC ID: ZINC98209221
+        VENDOR ID: Sigma Aldrich(SML1332|SIGMA), Chem Scene(CS-0875), MedChem Express Economical(HY-15434), Bioactive Tocris(5429), Molport(MolPort-039-101-308, MolPort-042-665-858)
+        SMILES string: CCN1CCN(Cc2ccc(NC(=O)c3ccc(C)c(Oc4ccnc5[nH]ccc45)c3)cc2C(F)(F)F)CC1
+        VENDOR NAME: Sigma Aldrich, Chem Scene, MedChem Express Economical, Bioactive Tocris, Molport
+        Explanation of chemical novelty: ZINC98209221, also known as NG25, is originally developed as the TAK1 (MAP3K7) inhibitor. Through our KIEO database, it shows that NG25 has high binding activity against the targets of RET(M918T), BRAF, SRC  and S6K (Percent of binding > 80%), and not binding to MKNK1, TTK, ERK8, PDK1 and PAK3. As the original intended target for this compound is TAK1, here, using our approach, we predict that this compound could be repurposed to inhibit the intended targets and avoiding the unintended targets.
+    - Solution 2:
+        ZINC ID: ZINC6745272
+        VENDOR ID: MedChem Express Economical(HY-10331, HY-10331A, HY-13308), Molport SC Economical(MolPort-009-679-472), Specs(AT-229/JK30570), Combi-Blocks(QC-8261), Matrix Scientific(120838, 147558)
+        SMILES string: CNC(=O)c1cc(Oc2ccc(NC(=O)Nc3ccc(Cl)c(C(F)(F)F)c3)c(F)c2)ccn1
+        VENDOR NAME: MedChem Express Economical, Molport SC Economical, Specs, Combi-Blocks, Matrix Scientific
+        Explanation of chemical novelty: ZINC6745272, also known as Regorafenib, is a FDA-approved small molecule multi-kinase inhibitor. From our prediction, this compound inhibits the targets with high specificity and not binds to the unintended targets.
+
+    - Solution 3: 
+        ZINC ID: ZINC4916928
+        VENDOR ID: Molport SC Economical(MolPort-004-498-182), UORSY(PB17581104), eMolecules(11682036), Mcule(MCULE-3936899675)
+        SMILES string: C[C@H](OC(=O)CCNS(=O)(=O)c1ccc(F)c(Cl)c1)C(=O)NC(N)=O
+        VENDOR NAME: Molport SC Economical, UORSY, eMolecules, Mcule
+        Explanation of chemical novelty: According to our Cmap score predictor, ZINC4916928 is predicted to be similar to the kinase inhibitor candidates from KIEO. Moreover, we double-checked this compound through Lipinski's rules, patent search and protein-ligand docking prediction algorithm. We think this compound to be a new drug candidate for this subchallenge.
+
+    - Solution 4:
+        ZINC ID: ZINC4916940
+        VENDOR ID: UORSY(PB17581104), Molport SC Economical(MolPort-004-498-182), eMolecules(11682036), Mcule(MCULE-3936899675)
+        SMILES string: C[C@@H](OC(=O)CCNS(=O)(=O)c1ccc(F)c(Cl)c1)C(=O)NC(N)=O
+        VENDOR NAME: UORSY, Molport SC Economical, eMolecules, Mcule
+        Explanation of chemical novelty: According to our Cmap score predictor, ZINC4916940 is predicted to be similar to the kinase inhibitor candidates from KIEO. Moreover, we double-checked this compound through Lipinski's rules, patent search and protein-ligand docking prediction algorithm. We think this compound to be a new drug candidate for this subchallenge.
+
+    - Solution 5:
+        ZINC ID: ZINC328621612
+        VENDOR ID: Intermed(IMED1757490204), Enamine-REAL(Z1757408967), Molport(MolPort-039-176-182), eMolecules(112028455)
+        SMILES string: O=C(CCC1CCCCC1)N=c1ccn([C@H]2CCNC2)[nH]1
+        VENDOR NAME: Intermed, Enamine-REAL, Molport, eMolecules
+        Explanation of chemical novelty: According to our Cmap score predictor, ZINC328621612 is predicted to be similar to the kinase inhibitor candidates from KIEO. Moreover, we double-checked this compound through Lipinski's rules, patent search and protein-ligand docking prediction algorithm. We think this compound to be a new drug candidate for this subchallenge.
+
+Problem 2:
+    - Solution 1:
+        ZINC ID: ZINC18279871
+        VENDOR ID: Molport BB Economical(MolPort-044-724-186), APExBIO(B6865), 1717 CheMall Corporation(HE005339HE285952HE315808), eMolecules(30487844), Tractus(TRA0029412)
+        SMILES string: O=C1N=c2ccccc2=C1c1[nH]c2ccccc2c1NO
+        VENDOR NAME: Molport BB Economical, APExBIO, 1717 CheMall Corporation, eMolecules, Tractus
+        Explanation of chemical novelty: ZINC18279871, also known as Indirubin-3'-monoxime, is originally developed as the CDK5 inhibitor. Through our KIEO database, it shows that NG25 has high binding activity against the targets of AURKA, PAK1, FGFR1, and LKB1, and low binding activity against PAK3, TAK1, and PIK3CA. As the original intended target for this compound is CDK5, here, using our approach, we predict that this compound could be repurposed to inhibit the intended targets and avoiding the unintended targets.
+
+    - Solution 2: 
+        ZINC ID: ZINC103702671
+        VENDOR ID: 1717 CheMall Corporation(HE005462, HE345512)
+        SMILES string: CCCCc1c2c([nH]c1=C1C=CC(=O)C=C1)=NC=CN2
+        VENDOR NAME: 1717 CheMall Corporation
+        Explanation of chemical novelty: ZINC103702671 is also known as Aloisine A. Through our KIEO database, it shows that Aloisine A has high binding activity against the targets of AURKA, PAK1, FGFR1, and LKB1, and low binding activity against PAK3, TAK1, and PIK3CA.
+
+    - Solution 3:
+        ZINC ID: ZINC96998798
+        VENDOR ID: Molport SC Economical(MolPort-029-907-194), eMolecules(49291323), Mcule(MCULE-9099787337)
+        SMILES string: O=C(c1cccc([N+](=O)[O-])c1)c1nc2ccccc2[nH]1
+        VENDOR NAME: Molport SC Economical, eMolecules, Mcule
+        Explanation of chemical novelty: According to our Cmap score predictor, ZINC96998798 is predicted to be similar to the kinase inhibitor candidates from KIEO. Moreover, we double-checked this compound through Lipinski's rules, patent search and protein-ligand docking prediction algorithm. We think this compound to be a new drug candidate for this subchallenge.
+
+    - Solution 4: 
+        ZINC ID: ZINC26776964
+        VENDOR ID: UORSY(PB354456136), Enamine-REAL(Z354378668), Molport SC Economical(MolPort-009-633-254), eMolecules(44087400), Mcule(MCULE-3249409325)
+        SMILES string: Fc1cccc(-c2nc(Cn3c(COc4ccccc4)nc4ccccc43)co2)c1
+        VENDOR NAME: UORSY, Enamine-REAL, Molport SC Economical, eMolecules, Mcule
+        Explanation of chemical novelty: According to our Cmap score predictor, ZINC26776964 is predicted to be similar to the kinase inhibitor candidates from KIEO. Moreover, we double-checked this compound through Lipinski's rules, patent search and protein-ligand docking prediction algorithm. We think this compound to be a new drug candidate for this subchallenge.
+
+    - Solution 5: 
+        ZINC ID: ZINC12311718
+        VENDOR ID: UORSY(PB18421376), Molport SC Economical(MolPort-009-592-311), eMolecules(43721080), Mcule(MCULE-8421407902)
+        SMILES string: CCOC(=O)c1ccc(NC(=O)CSc2nc3cc([N+](=O)[O-])ccc3n2-c2ccccc2OC)cc1
+        VENDOR NAME: UORSY, Molport SC Economical, eMolecules, Mcule
+        Explanation of chemical novelty: According to our Cmap score predictor, ZINC12311718 is predicted to be similar to the kinase inhibitor candidates from KIEO. Moreover, we double-checked this compound through Lipinski's rules, patent search and protein-ligand docking prediction algorithm. We think this compound to be a new drug candidate for this subchallenge.

@@ -1,0 +1,220 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+library(pheatmap)
+library(tidyverse)
+library(synapser)
+synLogin()
+
+result_map <- synTableQuery('SELECT * FROM syn17090711', includeRowIdAndRowVersion=F)$asDataFrame() 
+
+team_map <- tibble(
+  team_id = c("3365629", "3340411", "3331774", "3367446",
+              "3368939", "3368946", "3368944", "3365527",
+              "3368024", "3368855"),
+  team_name = c("SuperModels", "Zhaoping Xiong", "Huiyuan Chen", "Masahiro Mochizuki", 
+                "UM-BISBII", "Stratified", "Lasige-BioISI", "David Koes",
+                "Gregory Koytiger", "DMIS_MTD")
+)
+
+prob_1_kd <- synTableQuery('SELECT * FROM syn17160740', includeRowIdAndRowVersion=F)$asDataFrame() %>% 
+  mutate(chemical_id =stringr::str_extract(structure_link,"[[:alnum:]]+$")) %>% 
+  left_join(result_map) %>% 
+  left_join(team_map) 
+
+annot_row <- select(prob_1_kd, team_name, chemical_id) %>% column_to_rownames("team_name") %>% 
+  rename(`Chemical ID` = chemical_id) 
+
+annot_row$`Chemical ID`[annot_row$`Chemical ID`=="44521040"] <- "MolPort-044-521-040"
+
+prob_1_kd %<>% 
+  select("RET", "BRAF", "SRC", "RPS6KB1", "MKNK1", "MAPK15", "TTK", "PDPK1", "PAK3", "team_name") %>%  
+  column_to_rownames("team_name") 
+
+annot_col <- tribble(
+  ~kinase, ~`Target Status`,
+  "BRAF", "pro",
+  "MAPK15", "anti",
+  "MKNK1", "anti",
+  "PAK3", "anti",
+  "PDPK1", "anti",
+  "RET","pro",
+  "RPS6KB1", "pro",
+  "SRC", "pro",
+  "TTK", "anti"
+) %>% column_to_rownames("kinase") 
+
+pheatmap(prob_1_kd, 
+         color = viridis::cividis(1000, direction = -1), 
+         cluster_rows = T, 
+         cluster_cols = F, 
+         annotation_col = annot_col,
+         annotation_row = annot_row,
+         annotation_colors = list("Target Status" = c(anti = "#440154", pro = "#EF767A")),
+         cellwidth = 15, 
+         cellheight = 15)
+
+
+
+```
+
+```{r}
+library(rcdk)
+library(webchem)
+
+struct <- tribble(
+  ~chemical_id, ~inchikey,
+  "ZINC98209221", "SMPGEBOIKULBCT-UHFFFAOYSA-N",
+  "ZINC40900273", "KUQAFPIBXZKZON-UHFFFAOYSA-N",
+  "MolPort-044-521-040", "IRRLRYRHZRFVHW-UHFFFAOYSA-N",
+  "ZINC12493340", "YXTCWPPAQDRWKJ-UHFFFAOYSA-N",
+  "ZINC18516586",	"WHBIGIKBNXZKFE-UHFFFAOYSA-N",
+  "ZINC22200171",	"XHEJLXPUJJYRBJ-UHFFFAOYSA-N",
+  "ZINC57510750", "YXQVIGAVQUIKEV-UHFFFAOYSA-N",
+  "ZINC8718698",	"WSPSLGIMJPFVRP-UHFFFAOYSA-N",
+  "ZINC2833706",	"WZJICDDFBDLKPE-CMDGGOBGSA-N"
+)
+
+annot_row <- tribble(
+  ~chemical_id, ~`Has Activity`,
+  "ZINC98209221", "yes",
+  "ZINC40900273", "yes",
+  "MolPort-044-521-040", "yes",
+  "ZINC12493340", "no",
+  "ZINC18516586",	'no',
+  "ZINC22200171",	"no",
+  "ZINC57510750", "no",
+  "ZINC8718698",	"no",
+  "ZINC2833706",	"no"
+) %>% column_to_rownames("chemical_id")
+
+smiles<-sapply(struct$inchikey, cs_inchikey_inchi) %>% sapply(., cs_inchi_smiles)
+
+struct$smiles <- smiles
+
+pander::pander(struct)
+
+mols <- parse.smiles(smiles)
+fps <- lapply(mols, get.fingerprint, type='standard')
+
+fp.sim <- fingerprint::fp.sim.matrix(fps, method='tanimoto')
+
+colnames(fp.sim) <- struct$chemical_id
+rownames(fp.sim) <-struct$chemical_id
+
+pheatmap(fp.sim, 
+         color = viridis::plasma(1000, direction = 1, begin = 0, end = 1), 
+         cellwidth = 15, 
+         cellheight = 15,
+         show_rownames = T,
+         show_colnames = T, 
+         annotation_row = annot_row)
+
+```
+
+
+
+```{r}
+prob_2_kd <- synTableQuery('SELECT * FROM syn17161161', includeRowIdAndRowVersion=F)$asDataFrame() %>% 
+  mutate(chemical_id =stringr::str_extract(structure_link,"[[:alnum:]]+$")) %>% 
+  left_join(result_map) %>% 
+  left_join(team_map) 
+
+annot_row <- select(prob_2_kd, team_name, chemical_id) %>% column_to_rownames("team_name") %>% 
+  rename(`Chemical ID` = chemical_id) 
+
+prob_2_kd %<>% 
+  select("AURKA", "PAK1", "FGFR1", "STK11", "PAK3", "MAP3K7", "PIK3CA", "team_name") %>%  
+  column_to_rownames("team_name") 
+
+annot_col <- tribble(
+  ~kinase, ~`Target Status`,
+  "AURKA", "pro",
+  "PAK1", "pro",
+  "FGFR1", "pro",
+  "STK11",  "pro",
+  "PAK3", "anti",
+  "MAP3K7", "anti",
+  "PIK3CA", "anti"
+) %>% column_to_rownames("kinase") 
+
+
+pheatmap(prob_2_kd, 
+         color = viridis::cividis(1000, direction = -1), 
+         cluster_rows = T, 
+         cluster_cols = F, 
+         annotation_col = annot_col,
+         annotation_row = annot_row,
+         annotation_colors = list("Target Status" = c(anti = "#440154", pro = "#EF767A")),
+         cellwidth = 15, 
+         cellheight = 15)
+
+
+
+
+```
+
+
+
+```{r}
+
+struct <- tribble(
+  ~chemical_id, ~inchikey,
+"ZINC3938668",	"OYONTEXKYJZFHA-SSHUPFPWSA-N",
+"ZINC18279871",	"LDEWQRSYYHTQRA-UHFFFAOYSA-N",
+"ZINC538658",	"GYHCTFXIZSNGJT-XMMPIXPASA-N",
+"ZINC4165365",	"SKSADRBDFUPCRH-QGZVFWFLSA-N",
+"ZINC10213695",	"WMXIOEDPFCMCAG-UHFFFAOYSA-N",
+"ZINC150340658", "FOYHOBVZPWIGJM-KCHLEUMXSA-N",
+"ZINC1266",	"KSMAGQUYOIHWFS-ZETCQYMHSA-N",
+"ZINC20351955","HDHFHIYMPLXLRB-UHFFFAOYSA-N"
+)
+
+annot_row <- tribble(
+  ~'chemical_id', ~`Has Activity`,
+"ZINC3938668",	"yes",
+"ZINC18279871",	"yes",
+"ZINC538658",	"no",
+"ZINC4165365",	"no",
+"ZINC10213695",	"no",
+"ZINC150340658", "no",
+"ZINC1266",	"no",
+"ZINC20351955","no"
+) %>% column_to_rownames("chemical_id")
+
+smiles<-sapply(struct$inchikey, cs_inchikey_inchi) %>% sapply(., cs_inchi_smiles)
+
+struct$smiles <- smiles
+
+pander::pander(struct)
+
+mols <- parse.smiles(smiles)
+fps <- lapply(mols, get.fingerprint, type='standard')
+
+fp.sim <- fingerprint::fp.sim.matrix(fps, method='tanimoto')
+
+colnames(fp.sim) <- struct$chemical_id
+rownames(fp.sim) <-struct$chemical_id
+
+pheatmap(fp.sim, 
+         color = viridis::plasma(1000, direction = 1, begin = 0, end = 1), 
+         cellwidth = 15, 
+         cellheight = 15,
+         show_rownames = T,
+         show_colnames = T, 
+         annotation_row = annot_row)
+
+```
+```
+

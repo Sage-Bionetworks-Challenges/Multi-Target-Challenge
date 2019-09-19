@@ -1,0 +1,113 @@
+﻿# DREAM multi-target drug challenge submission form.
+# Instructions: This document is YAML format. Add your responses after the colon for each item below.
+# Do not otherwise modify the format of the document. You can use a YAML validator to check the structure is still intact before submission.
+# Provide at least one solution to each problem. Add additional "Solution" blocks as needed.
+ 
+Prediction Methods: |
+   Due to technical advances more and more profiling data becomes available, especially in the field of kinase research [1] and machine learning algorithms can be applied to a broader range of drug discovery challenges. However, most of the available data is highly imbalanced and biased towards inactive compounds. A major issue is that machine learning on skewed class labels tends to result in models with low sensitivity due to overfitting. 
+   We aimed to develop a model that, firstly, addresses this problem by using gradient boosting models of the LightGBM library [2] to increase the loss of false negative predictions. Cross-validation model performance can be deceiving when random sampling from highly correlated data sets [4]. A model might perform well either due to good generalization or by pure chance because of highly correlated data between folds. To prevent this, we developed a novel stratified cluster sampling strategy that leads to low correlation between folds while simultaneously preserving the underlying class (active/inactive) distribution (manuscript in preparation). This sampling method combined with Bayesian Optimization [5,6] was used to find an optimal set of hyperparameters for each target endpoint. The mean weighted F1 score based on a nested 5-fold stratified cluster cross-validation was introduced as the parameter evaluation metric.
+   Secondly, since some targets are still underexplored and have relatively little assay data available (especially too few active compounds), we decided to build multi-target models for the groups of desired on- and off-targets (see details below). Such strategies have been shown to be beneficial, especially when the targets of interest are related which holds true for kinases.[3]
+
+   A combination of publicly available data sets [7] was used to train and evaluate the gradient boosting models. A pIC50 value of 6.3 was used as activity threshold, compounds with activities above this value are considered active on a specific target. The compounds were standardized and represented by a vector containing the ECFP4 fingerprints of size 4096 and 111 molecular descriptors both calculated using the RDKit library. For the two challenges, the following data was collected (in parenthesis number of active compounds/ number of inactive compounds using the above-mentioned threshold).
+
+   Challenge 1 (Ch1)
+   - Required on-target RET (387/1187)
+   - Required off-target MKNK1 (46/623)
+   - Desired on-targets BRAF (1177/854), SRC (1019/1928), S6K (620/1253)
+   - Desired off-targets TTK (299/764), Erk8 (68/216), PDK1 (186/1535), PAK3 (25/640)
+   - Merged groups BRAF_group (BRAF, SRC, S6K); MKNK1_group (MKNK1, TTK, Erk8, PDK1)  
+
+   Challenge 2 (Ch2) 
+   - Required on-target PAK1 (103/1385), AURKA (1449/2024)
+   - Required off-target PAK3 (25/640), TAK1 (54/289)
+   - Desired on-targets FGFR1 (448/1819), LKB1 (16/294)
+   - Desired off-targets PIK3CA (no data available)
+   - Merged groups PAK3_group (PAK3, TAX1); LKB1_group (FGFR1, LKB1)
+
+   For each endpoint (which can be a single target or a target group) an ensemble model is created based on the resulting five hyperparameter sets found by the optimization routine. The outer-fold performance from the cross-validation of the resulting ensembles showed promising AUC values, i.e., RET 0.83 (+-0.03), MKNK1_group 0.75 (+-0.07), BRAF_group 0.94 (+-0.00), PAK1 0.94 (+-0.04), AURKA 0.89 (+-0.00), PAK3_group 0.79 (+-0.17) and FGFR1_group 0.90 (+-0.04).
+   With the described machine learning models in hand, a total of 13 million compounds from the ZINC15 database were screened. Potential leads were ranked by a scoring formula combining the resulting posterior probabilities of the individual models. The probabilities range between 0 and 1, the higher the value the higher the probability that the compound binds to the respective target. In the combined score, the probabilities of the required targets are up-weighted by a factor of two and the desired target probabilities are used as is (factor of 1). The probabilities for on-targets are summed-up, while the values for off-targets are subtracted from the total score.
+   After the ML-based screening and ranking, the top 1000 compounds were further filtered based on novelty and drug-likeness. First, compounds are discarded if their tanimoto similarity to known inhibitors for the respective required on- and off-target equals one. Second, compounds are dropped if they violate more than one rule of Lipinski’s rule of five.
+   The final set of high ranking compounds were finally screened against the required targets using structure-based methods (licensed software) and manually checked for their fit in the binding site of the respective required target. 
+ 
+Rationale:
+ Why is your approach innovative?: |
+  Nowadays that more and more profiling data becomes available, machine learning algorithms provide a valuable tool to solve drug discovery challenges. We developed a novel stratified clustering algorithm to account for correlation in the compound data and to achieve well regularized models using bayesian hyperparameter optimization. Since still not every kinase has enough data, be built multi-target models, exploiting the fact that kinase binding sites are relatively conserved. Furthermore, with our combined scoring scheme, we prioritize compounds that have a high chance to bind to the on-targets, while penalizing high binding probabilities to known off-targets. Thus, our method takes several targets into account, while allowing for fast screening of large data sets such as ZINC15. The calculated probability scores do neither dependent on available protein structures nor on  information about different conformations such as DFG-in  or DFG-out.
+  For the final selection from the top 1000 compounds, nevertheless, we included information from structure-based methods to validate the actual fit of the compounds in the binding site of the required on-target.
+
+ Why will your approach be generalizable?: |
+  Our machine learning method can be applied to any multi-target drug design project for which a decent amount of profiling data is available (more than 50 data points for each class). Furthermore, since kinases are highly similar, combining single target models to multi-target models for sets of on- and off-targets can help to improve the performance. Our ranking equation can be adapted to individual preferences for specific on- or off-targets based on the weighting factor, in the scoring function on-targets probabilities are accounted as positive contributions, off-targets probabilities as negative values. This procedure can be applied to any other combination of multi-kinase drugs.
+
+Problem 1:
+     - Solution 1:
+        ZINC ID: ZINC000057510750
+        VENDOR ID: MolPort-010-816-078
+        SMILES string: Cc1ccc(Nc2n[nH]nc2C(=O)Nc2ccc3c(c2)OCCO3)cc1C
+        VENDOR NAME: MolPort
+        Explanation of chemical novelty: Similar ZINC compounds with good scores ZINC000057510743. Low tanimoto similarity to known RET (0.33) or other kinase inhibitors. Probability to bind to RET 0.71, MKNK1_group 0.18.
+     - Solution 2:
+        ZINC ID: ZINC000205928292
+        VENDOR ID: MolPort-044-830-664
+        SMILES string: CC(C)n1nc(-c2ccc(NC(=O)Nc3cc(C(F)(F)F)ccc3F)cc2)c2c(N)ncnc21
+        VENDOR NAME: MolPort 
+        Explanation of chemical novelty: Similar ZINC compounds with good scores, e.g., ZINC000002576348, ZINC000013132888, ZINC000036056301. Low tanimoto similarity to known RET inhibitors (0.42). Probability to bind to RET 0.83, MKNK1_group 0.21.
+     - Solution 3:
+        ZINC ID: ZINC000072117895
+        VENDOR ID: MolPort-020-184-322
+        SMILES string: Cc1cc(N2CCCC2)nc(Nc2ccc(NC(=O)Nc3ccc(C)c(C)c3)cc2)n1
+        VENDOR NAME: MolPort 
+        Explanation of chemical novelty: Cluster of this compound serious with good scores, e.g.,  ZINC000064801478, ZINC000072437051, ZINC000064801495, ZINC000072117563, ZINC000021795483, all in stock at MolPort, not yet used in kinase context. Low tanimoto similarity to known RET (0.29) or other kinase inhibitors. Probability to bind to RET 0.74, MKNK1_group 0.20.
+     - Solution 4:
+        ZINC ID: ZINC00004176475 
+        VENDOR ID: C200-0356 
+        SMILES string: Cc1ccc(NC(=O)c2c(C)nc3sc(C(N)=O)c(N)c3c2-c2ccco2)c(C)c1
+        VENDOR NAME: ChemDiv
+        Explanation of chemical novelty: Preferred compound is ZINC00004176475. If not in stock use analogues such as ZINC000008592148 (MolPort-007-595-272) or ZINC000008592149 which are slightly too large to fulfill ¾ Lipinski's rule of 5. Low tanimoto similarity to known RET (0.31) or other kinase inhibitors. Probability to bind to RET 0.76, MKNK1_group 0.20.
+     - Solution 5:
+        ZINC ID: ZINC000033009328 
+        VENDOR ID: MolPort-007-808-595 
+        SMILES string: Cc1ccc(C(=O)Nc2ccc(N3CCCC3)c(NC(=O)Nc3ccc(C)cc3Cl)c2)cc1
+        VENDOR NAME: MolPort
+        Explanation of chemical novelty: Low tanimoto similarity to known RET (0.30) or other kinase inhibitors. Probability to bind to RET 0.73, MKNK1_group 0.21.
+
+Problem 2:
+    - Solution 1:
+        ZINC ID: ZINC000082161988
+        VENDOR ID: MolPort-023-329-179
+        SMILES string: CNc1nc(C)cc(NCc2cc3n(n2)CCCN(C(=O)C2CCC2)C3)n1
+        VENDOR NAME: Molport
+        Explanation of chemical novelty: Low tanimoto similarity to known Pak1 and AurA inhibitors. Probability to bind to Pak1 0.61, AurA 0.4, Pak3_group 0.47.
+    - Solution 2:
+        ZINC ID: ZINC000257264190
+        VENDOR ID: BDE25466541
+        SMILES string: Cc1cc(Nc2ccc(F)cn2)cc(C2CCN(C(=O)CCc3c(C)n[nH]c3C)CC2)n1
+        VENDOR NAME: Asinex
+        Explanation of chemical novelty: "Low tanimoto similarity to known Pak1 and AurA inhibitors. Probability to bind to Pak1 0.65, AurA 0.51, Pak3_group 0.56. Similar to the following compounds if compound not available: ZINC000257235516"
+    - Solution 3:
+        ZINC ID: ZINC000257233519
+        VENDOR ID: LAS51500802
+        SMILES string: Cc1ccc2[nH]c(CCC(=O)N(C)C[C@@]3(O)CCN(c4cc(C)nc5ccncc45)C3)nc2c1
+        VENDOR NAME: Asinex
+        Explanation of chemical novelty: "Low tanimoto similarity to known Pak1 and AurA inhibitors. Probability to bind to Pak1 0.61, AurA 0.63, Pak3_group 0.5. Similar to the following compounds if compound not available: ZINC000257258874"
+    - Solution 4:
+        ZINC ID: ZINC000257249805
+        VENDOR ID: LAS34152691
+        SMILES string: CN(C[C@@]1(O)CCCN(c2ccnc3cccnc23)C1)C(=O)CCc1nc2ccc(Cl)cc2[nH]1
+        VENDOR NAME: Asinex
+        Explanation of chemical novelty: "Low tanimoto similarity to known Pak1 and AurA inhibitors. Probability to bind to Pak1 0.6, AurA 0.55, Pak3_group 0.52. Similar to the following compounds if compound not available: ZINC000257236672"
+    - Solution 5:
+        ZINC ID: ZINC000225053809
+        VENDOR ID: I63739
+        SMILES string: S=C1N[C@H](c2ccccn2)[C@@H](c2cccn2-c2ccc(Cl)cn2)N1CCCNc1ccccc1
+        VENDOR NAME: AsisChem
+        Explanation of chemical novelty: Low tanimoto similarity to known Pak1 and AurA inhibitors. Probability to bind to Pak1 0.57, AurA 0.42, Pak3_group 0.39.  
+
+Note: Generally, Pak1 and Pak3 share high sequence similarity and it is difficult to distinguish between these two kinases. Please note that due to time reasons we could not fully finish the selection for challenge 2 compounds and would appreciate if you could put more weight on challenge 1 results. 
+
+References:
+    - 1. Kooistra A., Volkamer A., Kinase-centric computational drug development. Book chapter: Annual Reports in Medicinal Chemistry (Elsevier), Platform Technologies in Drug Discovery and Target Validation, Volume 50, 197-236 (2017)
+    - 2. Ke, G. et al. LightGBM: A Highly Efficient Gradient Boosting Decision Tree. in Advances in Neural Information Processing Systems 30 (eds. Guyon, I. et al.) 3146–3154 (Curran Associates, Inc., 2017).
+    - 3. Rosenbaum, L., Dörr, A., Bauer, M. R., Boeckler, F. M. & Zell, A. Inferring multi-target QSAR models with taxonomy-based multi-task learning. J Cheminform 5, 33 (2013).
+    - 4. Mayr, A., Klambauer, G., Unterthiner, T. & Hochreiter, S. DeepTox: Toxicity Prediction using Deep Learning. Front. Environ. Sci. 3, (2016).
+    - 5. Snoek, J., Larochelle, H. & Adams, R. P. Practical Bayesian Optimization of Machine Learning Algorithms. in Advances in Neural Information Processing Systems 25 (eds. Pereira, F., Burges, C. J. C., Bottou, L. & Weinberger, K. Q.) 2951–2959 (Curran Associates, Inc., 2012).
+    - 6. The GPyOpt authors. GPyOpt: A Bayesian Optimization framework in python. (2016).
+    - 7. Merget, B., Turk, S., Eid, S., Rippmann, F. & Fulle, S. Profiling Prediction of Kinase Inhibitors: Toward the Virtual Assay. J. Med. Chem. 60, 474–485 (2017).

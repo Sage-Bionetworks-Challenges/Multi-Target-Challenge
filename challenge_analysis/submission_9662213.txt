@@ -1,0 +1,40 @@
+Prediction Methods: We built a triple classifier to predict the bioactivity of a compound to a target protein. 
+    The classifier encodes both ligand molecules and target proteins by constructing a new end-to-end differentiable 
+    neural net architecture, in which proteins are represented by amino acid sequence embedding and molecules 
+    by fingerprint generated from graph convolutional neural network.
+
+Rationale:
+    Why is your approach innovative?: Graph convolutional neural network for molecular fingerprint is often used 
+        as a deep learning model to predict the bioactive. As a ligand-based model, the inability to predict 
+        bioactivity to a new target with few bioactive compounds constrains its generalization. 
+        To build a more generalizable and useful deep model, we incorporate the feature from target proteins 
+        by converting their amino acid sequence into “word embedding” vector and trained together with 
+        molecular fingerprint generated from graph convolutional neural network. 
+    Why will your approach be generalizable?: For a given new compound-target pair, our predictive model will classify 
+        the bioactivity into potent, weak or inactive. Our deep model is trained on a high-quality dataset 
+        and learns features from both ligands and targets, achieving a predictive accuracy of 0.91 on a external test set. 
+
+
+Problem 1:
+    - Solution 1:
+        ZINC ID: ZINC98209221
+        VENDOR ID: 5429
+        SMILES string: CCN1CCN(Cc2ccc(NC(=O)c3ccc(C)c(Oc4ccnc5[nH]ccc45)c3)cc2C(F)(F)F)CC1
+        VENDOR NAME: Tocris
+        Explanation of chemical novelty: It has few citations and returns only 46 compounds by similarity search with a threshold of 0.8 on scifinder. 
+            Only patented as inhibitor of MAP4K2 and reported to inhibit TAK1, LYN and Abl kinase.
+Problem 2:
+    - Solution 1:
+        ZINC ID: ZINC147474927
+        VENDOR ID: F20815
+        SMILES string: COc1ccc(N(C(=O)Nc2c(C)cccc2C)c2cc(Nc3ccc(N4CCN(C)CC4)cc3)ncn2)c(OC)c1
+        VENDOR NAME: AstaTech
+        Explanation of chemical novelty: Returns only 42 compounds by similarity search with a threshold of 0.8 on scifinder.
+    - Solution 2:
+        ZINC ID: ZINC3938668
+        VENDOR ID: 2693
+        SMILES string: Cc1[nH]c(/C=C2\C(=O)Nc3ccc(S(=O)(=O)Cc4c(Cl)cccc4Cl)cc32)c(C)c1C(=O)N1CCC[C@@H]1CN1CCCC1
+        VENDOR NAME: Tocris
+        Explanation of chemical novelty: Potent, selective and ATP-competitive inhibitor of MET kinase (IC50 values are 9, 68, 200, 
+            1400, 3000, 3800 and 6000 nM for MET, Ron, Flk-1, c-abl, FGFR1, EGFR and c-src respectively and > 10000 nM for IGF-IR, 
+            PDGFR, AURORA2, PKA, PKBα, p38α, MK2 and MK3). 

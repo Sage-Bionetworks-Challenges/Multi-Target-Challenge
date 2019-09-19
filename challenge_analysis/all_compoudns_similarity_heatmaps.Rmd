@@ -1,0 +1,178 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+library(tidyverse)
+
+subs <- c("submission_9662093.txt","submission_9662288.txt","submission_9662212.txt",
+          "submission_9662301.txt","submission_9662213.txt","submission_9662305.txt",
+          "submission_9662215.txt","submission_9662708.txt","submission_9662285.txt",
+          "submission_9681279.txt","submission_9662287.txt","submission_9681351.txt")
+
+get_user_or_team_names <- function(id){
+ name <- try(synGetTeam(id)$name, silent = T) ##try to get the team name from id 
+ if(class(name)=='try-error'){ ##if it is not a team, will return error, so then try to get user profile
+ try({
+   prof <- synGetUserProfile(id = id) ##get first and last name
+   fn <- prof$firstName
+   ln <- prof$lastName
+   if(is.null(fn) | is.null(ln)){
+     un <- prof$userName
+     return(un) 
+   }else if(fn == "" | ln == ""){ ##if empty, get username instead
+     un <- prof$userName
+     return(un)
+   }else{
+     return(paste(fn, ln))
+   }
+   })
+   }else{
+     return(name)
+   }
+}
+
+get_smiles <- function(file){ 
+  
+ x <- yaml::read_yaml(file)
+
+ print(file)
+ submission <- stringr::str_extract(file,"\\d+")
+ 
+ p1 <- rlist::list.flatten(x$`Problem 1`)
+ soln_names<-str_extract(names(p1),"Solution \\d+") %>% unique()
+ foo <- lapply(soln_names, function(i){
+  
+    id_act <- x <- tryCatch(
+     {
+       id <- paste0(i,".ZINC ID")
+       get(id, p1)
+     },
+     error = function(e){
+       id <- paste0(i,".VENDOR ID")
+       get(id, p1)
+     }
+   )
+   smi <- paste0(i,".SMILES string")
+   smi_act <- get(smi, p1) 
+   return(tibble(submission = submission,problem = "Problem 1",solution = i,ID=id_act, SMILES=smi_act))
+ })
+ 
+ foo <- bind_rows(foo)
+ 
+ p2 <- rlist::list.flatten(x$`Problem 2`)
+ soln_names<-str_extract(names(p2),"Solution \\d+") %>% unique()
+ foo2 <- lapply(soln_names, function(i){
+   id_act <- x <- tryCatch(
+     {
+       id <- paste0(i,".ZINC ID")
+       get(id, p2)
+     },
+     error = function(e){
+       id <- paste0(i,".VENDOR ID")
+       get(id, p2)
+     }
+   )
+   
+   smi <- paste0(i,".SMILES string")
+   smi_act <- get(smi, p2) 
+   return(tibble(submission = submission,problem = "Problem 2",solution = i, ID=id_act, SMILES=smi_act))
+ })
+ 
+ foo2 <- bind_rows(foo2)
+ bar <- bind_rows(foo, foo2)
+}
+
+smiles <- lapply(subs, get_smiles) %>% bind_rows
+
+
+teams <- synTableQuery("Select team_id, submission_id as \"submission\" from syn17090711")$asDataFrame() %>% 
+  select(-ROW_ID, -ROW_VERSION) %>% 
+  mutate(submission = as.character(submission)) %>% 
+  mutate(team_name = sapply(team_id, get_user_or_team_names))
+
+```
+
+```{r fig.height=10, fig.width=10}
+
+library(rcdk)
+library(webchem)
+library(pheatmap)
+
+problem_1_smiles <- filter(smiles, problem == "Problem 1") %>% 
+  inner_join(teams)
+
+pander::pander(problem_1_smiles)
+
+mols <- parse.smiles(problem_1_smiles$SMILES)
+
+fps <- lapply(mols, get.fingerprint, type='standard')
+
+fp.sim <- fingerprint::fp.sim.matrix(fps, method='tanimoto')
+
+
+colnames(fp.sim) <- paste0(problem_1_smiles$ID,"_",problem_1_smiles$team_name)
+rownames(fp.sim) <- paste0(problem_1_smiles$ID,"_",problem_1_smiles$team_name)
+
+cols <- jcolors::jcolors_contin(palette = "pal3")
+
+annot <- problem_1_smiles %>% 
+  select(ID, team_name) %>% 
+  mutate(team_name_annot =team_name) %>% 
+  mutate(id_annot = ID) %>% 
+  unite(temp,ID,team_name, sep = "_") %>% 
+  column_to_rownames("temp")
+  
+pheatmap(fp.sim, 
+         color = cols(1000) ,
+         cellwidth = 15, 
+         cellheight = 15,
+         show_rownames = T,
+         show_colnames = T,
+         border_color = NA,
+         annotation_row = annot['team_name_annot'],
+         labels_row = annot$team_name_annot,
+         labels_col = annot$id_annot)
+```
+
+```{r fig.height=10, fig.width=10}
+
+problem_2_smiles <- filter(smiles, problem == "Problem 2") %>% 
+  inner_join(teams)
+
+pander::pander(problem_2_smiles)
+
+mols <- parse.smiles(problem_2_smiles$SMILES)
+
+fps <- lapply(mols, get.fingerprint, type='standard')
+
+fp.sim <- fingerprint::fp.sim.matrix(fps, method='tanimoto')
+
+colnames(fp.sim) <- paste0(problem_2_smiles$ID,"_",problem_2_smiles$team_name)
+rownames(fp.sim) <- paste0(problem_2_smiles$ID,"_",problem_2_smiles$team_name)
+
+cols <- jcolors::jcolors_contin(palette = "pal3")
+
+annot <- problem_2_smiles %>% 
+  select(ID, team_name) %>% 
+  mutate(team_name_annot =team_name) %>% 
+  mutate(id_annot = ID) %>% 
+  unite(temp,ID,team_name, sep = "_") %>% 
+  column_to_rownames("temp")
+  
+pheatmap(fp.sim, 
+         color = cols(1000) ,
+         cellwidth = 15, 
+         cellheight = 15,
+         show_rownames = T,
+         show_colnames = T,
+         border_color = NA,
+         annotation_row = annot['team_name_annot'],
+         labels_row = annot$team_name_annot,
+         labels_col = annot$id_annot)
+```

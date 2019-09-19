@@ -1,0 +1,72 @@
+Prediction Methods: Our methods are described in our project wiki and on google docs, https://docs.google.com/document/d/1JEWeV99FDk1zwV5Hu4tRUYgSeJHPFpzqFj9MOZl3sU0/edit?usp=sharing . Solutions (compounds) are ranked from 1 to 5. Compounds have been checked for novelty and patentability.
+
+
+
+Rationale:
+    Why is your approach innovative?: We are confident that our approach represents one of the most rigorous methods of all submissions. 1) We tailored our workflow to every target and anti target, using benchmark data. 2) This was done for multiple models (statistical, structure based, and metadynamics). 3) Statistical models (biosignatures) trained on Janssen data were used, in general these models achieve a really predictive ROC compared with statistical models trained on public data (e.g. ROC ~0.95 compared with ROC ~0.8). 4) Metadynamics simulations gave us more confidence that the binding modes of compounds that we selected were stable.
+    Why will your approach be generalizable?: In our lab we have used and are using comparable workflows for polypharmacology predictions. We have applied these workflows on different target classes such as enzymes and transmembrane receptors. By using large libraries containing compound and target information, our approach is generalizable to proteins with sufficient bioactvity data.
+
+
+Problem 1:
+    - Solution 1:
+        ZINC ID: ZINC000012493340
+        VENDOR ID: ASN02751147,ST50530067,17089330,MCULE-8541271424
+        SMILES string: COc1ccc2cc(CNc3ccc(Cl)cc3)c(=O)[nH]c2c1
+        VENDOR NAME: Asinex,TimTec,eMolecules,Mcule
+        Explanation of chemical novelty: This compound was selected because it was one of the top scoring compounds in all of the models, the binding mode looked good in all on-targets, and it scored relatively well in the Janssen statistical model. Moreover this scaffold (1H-quinolin-2-one) would represent a new scaffold for RET. Additionally, this compound is not similar to known active compounds for the challenge proteins and not present in SciFinder.
+    - Solution 2:
+        ZINC ID: ZINC1801746
+        VENDOR ID: R853313|ALDRICH
+        SMILES string: Clc1ccc(Oc2ncnc3scc(-c4ccc(Br)cc4)c23)c(Cl)c1
+        VENDOR NAME: Aldrich CPR (there are more than 5 vendors)
+        Explanation of chemical novelty: This compound scored really well in the metadynamics, had a good binding mode in the on-targets, but a lower score in the statistical models. This compound is not similar to known active compounds for the challenge proteins and not present in SciFinder.
+    - Solution 3:
+        ZINC ID: ZINC000001398621
+        VENDOR ID: 7N-768
+        SMILES string: Nc1nc(Nc2ccc(Cl)cc2)sc1C(=O)c1ccc(F)cc1
+        VENDOR NAME: KeyOrganics (there are more than 5 vendors)
+        Explanation of chemical novelty: The binding mode of this compound looks really good in RET (triple interaction with the hinge), however it was not able to dock well in BRAF. This compound is not similar to known active compounds for the challenge proteins and not present in SciFinder.
+    - Solution 4:
+        ZINC ID: ZINC000004032944
+        VENDOR ID: MolPort-003-033-441, F0611-0801, 4937996, MCULE-8382667119
+        SMILES string: Cc1ccc2cc(CCNC(=O)c3ccc(Cl)cc3Cl)c(=O)[nH]c2c1C
+        VENDOR NAME: Molport SC Economical, Life Chemicals, eMolecules, Mcule
+        Explanation of chemical novelty: This compound is similar to Solution 1, it scored better in the structure based models, but worse in the Janssen statistical model. This compound is not similar to known active compounds for the challenge proteins and not present in SciFinder.
+    - Solution 5:
+        ZINC ID: ZINC000095930125
+        VENDOR ID: HY-15730
+        SMILES string: C=CC(=O)N1CCC(Oc2cc3c(cc2OC)ncnc3Nc2ccc(Cl)c(Cl)c2F)CC1
+        VENDOR NAME: MedChem Express Economical (there are more than 5 vendors)
+        Explanation of chemical novelty: Although this compound, Poziotinib, is not novel it might be interesting to test from a drug repurposing perspective, no data is given in ChEMBL for this compound. 
+Problem 2:
+    - Solution 1: 
+        ZINC ID: ZINC000020351955
+        VENDOR ID: 77807007, MolPort-005-135-808, 23830893, MCULE-7651088158
+        SMILES string: O=C(c1ccc2nccn2c1)N1CCc2[nH]nc(CCC3CCCC3)c2C1
+        VENDOR NAME: ChemBridge Economical, Molport SC Economical, eMolecules, Mcule
+        Explanation of chemical novelty: This compound has a good activity profile in the structure-based models. Additionally, this compound scored good in the Janssen statistical model. This compound is not similar to known active compounds for the challenge proteins and not present in SciFinder.
+    - Solution 2: 
+        ZINC ID: ZINC000067817173
+        VENDOR ID: 45568190, MolPort-019-889-395, 36585474, MCULE-5856441480
+        SMILES string: Cc1nc(C)c2c(n1)O[C@H](CN1CCc3[nH]nc(-c4ccccc4F)c3C1)C2
+        VENDOR NAME: ChemBridge Economical, Molport SC Economical, eMolecules, Mcule
+        Explanation of chemical novelty: This compound has a good bioactivity profile in structure-based models, except for PIK3CA. However, PIK3CA inactivity is predicted more favorably by statistical models. This compound is not similar to known active compounds for the challenge proteins and not present in SciFinder.
+    - Solution 3:
+        ZINC ID: ZINC000015729174
+        VENDOR ID: MolPort-007-787-103, 16249573, MCULE-9202236133
+        SMILES string: COc1ccc(-c2[nH]ncc2CN2CCN(C(=O)Cc3ccc(F)cc3)CC2)cc1
+        VENDOR NAME: Molport SC Economical, eMolecules, Mcule
+        Explanation of chemical novelty: The binding poses of this compound in AURKA and PAK1 looked good. Also, it scored good in metadynamics. This compound scored good in the Janssen statistical model. Additionally it has a good binding pose in AURKA and PAK1. This compound is not similar to known active compounds for the challenge proteins and not present in SciFinder.
+    - Solution 4: 
+        ZINC ID: ZINC000257201200
+        VENDOR ID: BDE30723429, 43249057
+        SMILES string: Cn1cc(CN2CCC(c3ccnc(Nc4cnccn4)c3)CC2)cn1
+        VENDOR NAME: Asinex, eMolecules
+        Explanation of chemical novelty: This compound scored relatively good in the Janssen statistical model. This compound is not similar to known active compounds for the challenge proteins and not present in SciFinder.
+    - Solution 5: 
+        ZINC ID: ZINC000035509152
+        VENDOR ID: MolPort-010-686-472
+        SMILES string: O=C(CCc1ccccc1)NCCc1n[nH]c(-c2ccccc2)n1
+        VENDOR NAME: Molport SC Economical (there are more than 5 vendors)
+        Explanation of chemical novelty: The binding poses of this compound in the required on-targets looked good. Additionally, TAK1 binding seems unlikely. This compound is not similar to known active compounds for the challenge proteins and not present in SciFinder.
+
