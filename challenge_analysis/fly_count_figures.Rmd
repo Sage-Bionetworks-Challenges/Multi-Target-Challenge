@@ -1,0 +1,79 @@
+---
+title: "Ensemble model analysis - quantile normalized"
+author: "Robert Allaway, Sage Bionetworks"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+    code_fold: hide
+    toc: true
+    toc_float: true
+---
+
+## Introduction
+
+In this experiment, RET2B and control D. melanogaster were treated with DMSO (negative control), two candidate RET-targeting compounds identified using top performing methods (ZINC4020 and ZINC9820) and two positive control multi-targeting RET inhibitors previously demonstrated to rescue the RET2B model (AD80, APS6-45). 
+
+% survival indicates the number of organisms that survived, with the idea being that inhibition of the RET-pro-targets will result in increased rescue of the RET2B model, which dies without intervention. 
+
+Here, we plot the results and perform statistical analysis to assess whether the interventions had a significant effect. 
+Bars show the mean percent survival and error bars show the standard deviation of four replicates per condition. A Mann-Whitney test was used to assess the significance of changes to percent survival in the varying conditions. The RET2B Adult panel (bottom right) indicates that higher concentrations of AD80 or APS6-45 significantly (p<0.05) rescue the RET2B model, while the two candidate ZINC molecules have a minimal and non statistically-significant effect on percent survival to adulthood. 
+
+```{r}
+library(tidyverse)
+
+ord <- c("DMSO","ZINC4090-1uM","ZINC4090-10uM","ZINC4090-50uM","ZINC9820-1uM","ZINC9820-10uM","ZINC9820-50uM","AD80-1uM","AD80-10uM","AD80-50uM","APS 6-45 1uM","APS 6-45 10uM","APS 6-45 50uM")
+
+##counts provided by Cagan lab
+fly_counts <- read_csv("fly_counts.csv") %>% 
+  rename(pupae = pupae_count,
+         adult = adult_count) %>% 
+  tidyr::gather(key = "stage", value = "count", pupae, adult) %>% 
+  mutate(percent = count/total_count*100) %>% 
+  group_by(tx, genotype, stage) %>% 
+  mutate(tx_alpha = str_extract(tx, "\\d+uM") %>% str_extract(., "\\d+") %>% as.numeric() %>% rank) %>% 
+  mutate(tx_alpha = case_when(is.na(tx_alpha) ~ 0,
+                              !is.na(tx_alpha) ~ tx_alpha)) %>% 
+  mutate(tx_name = str_extract(tx, "[[:alnum:]]+")) %>% 
+  mutate(genotype = case_when(genotype=="ret2b" ~ "RET2B",
+                              genotype!="ret2b" ~ "Control")) %>% 
+  mutate(stage = tools::toTitleCase(stage))
+ 
+symnum.args <- list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, 1), symbols = c("****", "***", "**", "*", "ns"))
+
+ggplot(data = fly_counts) +
+  geom_bar(aes(x = fct_relevel(tx, ord), 
+               y = percent,
+               fill = tx_name), stat = 'summary', fun.data = mean_se) + 
+  stat_summary(aes(x = fct_relevel(tx, ord), 
+               y = percent),
+               fun.data = mean_se,  
+               geom = "errorbar") +
+  ggpubr::stat_compare_means(aes(x = fct_relevel(tx, ord), y = percent),
+               ref.group = "DMSO", hide.ns = TRUE,
+               method = "wilcox.test",
+               label = "p.signif",
+               label.y.npc = 0.9,
+               symnum.args = symnum.args) +
+  facet_wrap(genotype~fct_relevel(stage, "Pupae", "Adult"))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  labs(x = "Treatment", y = "Mean Survival (%)") +
+  guides(fill = F) 
+
+ggsave("fly_counts.png", width = 6, height = 6)
+
+
+glue::glue("min flies counted: {min(fly_counts$total_count)}")
+glue::glue("max flies counted: {max(fly_counts$total_count)}")
+
+fly_count_summary_table <- fly_counts %>% 
+  group_by(tx, genotype, stage) %>% 
+  summarize(mean_percent_survival = signif(mean(percent),4), 
+            std_dev_survival = signif(sd(percent),4))
+
+write_csv(fly_count_summary_table, "supplemental_table_fly_counts.csv") 
+reactable::reactable(fly_count_summary_table)
+```
+
+
